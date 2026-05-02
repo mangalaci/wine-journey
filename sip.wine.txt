@@ -1,0 +1,35 @@
+This 3-level roadmap gets you there:
+
+1/ GenAI & RAG Basics:
+Start here. Master the fundamentals that everything else builds on.
+↳ Learn what Generative AI is and where it's used.
+↳ Understand how LLMs are trained and used.
+↳ Write better prompts that guide the model.
+↳ Finetune the temperature, top-p, and tokens to shape output.
+↳ Clean and chunk data so models can read it well.
+↳ Combine LLMs with search using RAG.
+↳ Use vector databases like Pinecone or Chroma.
+↳ Call models through LangChain or LlamaIndex.
+↳ Let LLMs use tools and APIs to act.
+
+2/ AI Agent Essentials:
+This is where most people quit. Don't be most people.
+↳ Know what AI agents are: they plan and act.
+↳ Explore LangChain, CrewAI, AutoGen, and Agno.
+↳ Build your first agent that does real tasks.
+↳ Design workflows that guide each step.
+↳ Add memory so it remembers past actions.
+↳ Check performance and fix weak spots.
+↳ Teach multi-step reasoning for complex work.
+↳ Build multi-agent systems that work together.
+↳ Use Agentic RAG for smarter answers.
+↳ Add action planning so agents adapt.
+↳ Set safety and guardrails for control.
+
+3/ Advanced Agent Skills:
+Production-ready agents that solve real problems.
+↳ Connect agents to Slack, Notion, or Gmail.
+↳ Create autonomous loops that run on their own.
+↳ Add custom APIs or Python tools.
+↳ Finetune for speed, cost, and reliability
+↳ Deploy your agent for real users.
