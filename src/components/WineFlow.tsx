@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { buildTasteProfile } from "@/lib/tasteProfile";
+import { ProgressIndicator } from "@/components/ProgressIndicator";
+import { RecommendationCard } from "@/components/RecommendationCard";
+import { TasteProfileCard } from "@/components/TasteProfileCard";
+import { buildTasteProfile, type LikedWine } from "@/lib/tasteProfile";
 
 type Step = "home" | "camera" | "result" | "feedback";
 
@@ -9,7 +12,7 @@ const MOCK_WINE = {
   name: "Les Hauts Verdots Sauvignon Blanc",
   region: "Loire Valley, France",
   description: "Bright citrus and green apple — crisp and refreshing.",
-  traits: ["light", "fruity", "crisp"] as const,
+  tags: ["light", "fruity", "white"] as const,
 };
 
 const RECOMMENDATIONS = [
@@ -30,17 +33,10 @@ const RECOMMENDATIONS = [
   },
 ];
 
-const tierLabel: Record<(typeof RECOMMENDATIONS)[number]["tier"], string> = {
-  safe: "safe",
-  premium: "premium",
-  explore: "explore",
-};
-
 export function WineFlow() {
   const [step, setStep] = useState<Step>("home");
   const [captureUrl, setCaptureUrl] = useState<string | null>(null);
-  const [likedTraits, setLikedTraits] = useState<string[]>([]);
-  const [dislikedTraits, setDislikedTraits] = useState<string[]>([]);
+  const [likedWines, setLikedWines] = useState<LikedWine[]>([]);
   const [showRecs, setShowRecs] = useState(false);
   const [vote, setVote] = useState<"up" | "down" | null>(null);
 
@@ -101,7 +97,8 @@ export function WineFlow() {
     setShowRecs(false);
   };
 
-  const tasteLine = buildTasteProfile(likedTraits);
+  const tasteProfile = buildTasteProfile(likedWines);
+  const likedCount = likedWines.length;
 
   const resetFlow = () => {
     setCaptureUrl(null);
@@ -121,18 +118,8 @@ export function WineFlow() {
         </h1>
       </header>
 
-      {tasteLine ? (
-        <section
-          className="rounded-2xl border border-[var(--border)] bg-white/80 px-4 py-3 text-sm text-[var(--muted)] shadow-sm backdrop-blur-sm"
-          aria-live="polite"
-        >
-          <span className="font-medium text-[var(--ink)]">Taste profile: </span>
-          {tasteLine}.
-        </section>
-      ) : null}
-
       {step === "home" && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 py-12">
+        <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6 py-12">
           <p className="max-w-[260px] text-center text-sm leading-relaxed text-[var(--muted)]">
             Point your camera at any bottle — we&apos;ll show a demo match and
             learn what you like.
@@ -140,7 +127,7 @@ export function WineFlow() {
           <button
             type="button"
             onClick={() => setStep("camera")}
-            className="w-full max-w-xs rounded-full bg-[var(--accent)] px-6 py-4 text-base font-semibold text-white shadow-md transition hover:opacity-95 active:scale-[0.98]"
+            className="w-full max-w-xs rounded-full bg-[var(--accent)] px-6 py-4 text-base font-semibold text-white shadow-md transition duration-150 hover:opacity-95 active:scale-95"
           >
             Scan wine
           </button>
@@ -148,7 +135,7 @@ export function WineFlow() {
       )}
 
       {step === "camera" && (
-        <div className="flex flex-col gap-4">
+        <div className="animate-screen-in flex flex-col gap-4">
           <div className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-black shadow-inner aspect-[3/4]">
             <video
               ref={videoRef}
@@ -161,14 +148,14 @@ export function WineFlow() {
             <button
               type="button"
               onClick={() => setStep("home")}
-              className="flex-1 rounded-xl border border-[var(--border)] bg-white py-3 text-sm font-medium text-[var(--ink)]"
+              className="flex-1 rounded-xl border border-[var(--border)] bg-white py-3 text-sm font-medium text-[var(--ink)] transition duration-150 active:scale-95"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleCapture}
-              className="flex-1 rounded-xl bg-[var(--accent)] py-3 text-sm font-semibold text-white"
+              className="flex-1 rounded-xl bg-[var(--accent)] py-3 text-sm font-semibold text-white transition duration-150 active:scale-95"
             >
               Capture
             </button>
@@ -177,7 +164,7 @@ export function WineFlow() {
       )}
 
       {step === "result" && captureUrl && (
-        <div className="flex flex-col gap-6">
+        <div className="animate-screen-in flex flex-col gap-6">
           <div className="overflow-hidden rounded-2xl border border-[var(--border)] shadow-sm">
             <img
               src={captureUrl}
@@ -202,7 +189,7 @@ export function WineFlow() {
               setShowRecs(false);
               setStep("feedback");
             }}
-            className="rounded-full bg-[var(--accent)] px-6 py-4 text-center text-base font-semibold text-white"
+            className="rounded-full bg-[var(--accent)] px-6 py-4 text-center text-base font-semibold text-white transition duration-150 active:scale-95"
           >
             Continue
           </button>
@@ -210,7 +197,7 @@ export function WineFlow() {
       )}
 
       {step === "feedback" && (
-        <div className="flex flex-col gap-8 py-4">
+        <div className="animate-screen-in flex flex-col gap-8 py-4">
           <p className="text-center text-lg font-medium text-[var(--ink)]">
             Did you like it?
           </p>
@@ -219,11 +206,14 @@ export function WineFlow() {
               type="button"
               aria-label="Thumbs up"
               disabled={vote !== null}
-              className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--border)] bg-white text-3xl shadow-sm transition enabled:hover:border-[var(--accent)] enabled:active:scale-95 disabled:opacity-40"
+              className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--border)] bg-white text-3xl shadow-sm transition duration-150 enabled:hover:border-[var(--accent)] enabled:active:scale-95 disabled:opacity-40"
               onClick={() => {
                 if (vote) return;
                 setVote("up");
-                setLikedTraits((prev) => [...prev, ...MOCK_WINE.traits]);
+                setLikedWines((prev) => [
+                  ...prev,
+                  { name: MOCK_WINE.name, tags: [...MOCK_WINE.tags] },
+                ]);
                 setShowRecs(true);
               }}
             >
@@ -233,11 +223,10 @@ export function WineFlow() {
               type="button"
               aria-label="Thumbs down"
               disabled={vote !== null}
-              className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--border)] bg-white text-3xl shadow-sm transition enabled:hover:border-[var(--accent)] enabled:active:scale-95 disabled:opacity-40"
+              className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--border)] bg-white text-3xl shadow-sm transition duration-150 enabled:hover:border-[var(--accent)] enabled:active:scale-95 disabled:opacity-40"
               onClick={() => {
                 if (vote) return;
                 setVote("down");
-                setDislikedTraits((prev) => [...prev, ...MOCK_WINE.traits]);
                 setShowRecs(false);
               }}
             >
@@ -252,24 +241,20 @@ export function WineFlow() {
           ) : null}
 
           {showRecs && vote === "up" ? (
-            <section className="space-y-4 rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
+            <section className="animate-card-in space-y-4 rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
+              <TasteProfileCard profile={tasteProfile} />
+              <ProgressIndicator likedCount={likedCount} />
               <p className="text-sm font-medium text-[var(--ink)]">
                 Because you liked this style
               </p>
               <ul className="space-y-3">
                 {RECOMMENDATIONS.map((wine) => (
-                  <li
+                  <RecommendationCard
                     key={wine.name}
-                    className="flex flex-col gap-1 rounded-xl bg-[var(--accent-soft)]/40 px-3 py-3"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium">{wine.name}</span>
-                      <span className="shrink-0 rounded-full bg-[var(--accent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-                        {tierLabel[wine.tier]}
-                      </span>
-                    </div>
-                    <span className="text-xs text-[var(--muted)]">{wine.detail}</span>
-                  </li>
+                    name={wine.name}
+                    detail={wine.detail}
+                    tier={wine.tier}
+                  />
                 ))}
               </ul>
             </section>
@@ -279,7 +264,7 @@ export function WineFlow() {
             <button
               type="button"
               onClick={resetFlow}
-              className="rounded-full border border-[var(--border)] bg-white py-3 text-sm font-medium text-[var(--ink)]"
+              className="rounded-full border border-[var(--border)] bg-white py-3 text-sm font-medium text-[var(--ink)] transition duration-150 active:scale-95"
             >
               Scan another bottle
             </button>

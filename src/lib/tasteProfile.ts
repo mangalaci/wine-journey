@@ -1,28 +1,35 @@
-export function buildTasteProfile(likedTraits: string[]): string {
-  if (likedTraits.length === 0) {
-    return "";
+export type LikedWine = {
+  name: string;
+  tags: string[];
+};
+
+export function buildTasteProfile(likedWines: LikedWine[]): string {
+  if (likedWines.length === 0) {
+    return "You're still exploring your taste";
   }
 
-  const weight = likedTraits.reduce<Record<string, number>>((acc, t) => {
-    acc[t] = (acc[t] ?? 0) + 1;
+  const likedTags = likedWines.flatMap((wine) => wine.tags);
+  const weight = likedTags.reduce<Record<string, number>>((acc, tag) => {
+    acc[tag] = (acc[tag] ?? 0) + 1;
     return acc;
   }, {});
 
-  const ranked = Object.entries(weight).sort((a, b) => b[1] - a[1]);
-  const top = ranked.slice(0, 2).map(([k]) => k);
+  const top = Object.entries(weight)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([tag]) => tag);
 
   if (top.includes("light") && top.includes("fruity")) {
     return "You seem to prefer light, fruity wines";
   }
-  if (top.includes("light") || top.includes("crisp")) {
-    return "You seem to prefer fresh, easy-drinking wines";
-  }
-  if (top.includes("fruity")) {
-    return "You seem to prefer fruity, aromatic wines";
-  }
-  if (top.includes("bold") || top.includes("rich")) {
-    return "You seem to prefer fuller-bodied wines";
+
+  if (top.includes("bold") || top.includes("intense")) {
+    return "You enjoy bold, intense wines";
   }
 
-  return `You seem to enjoy ${top.join(" & ")} styles`;
+  if (top.length === 0) {
+    return "You're still exploring your taste";
+  }
+
+  return `You seem to prefer ${top.join(", ")} wines`;
 }
