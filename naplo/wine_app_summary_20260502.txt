@@ -1,0 +1,32 @@
+WINE APP PRODUCT SUMMARY
+
+Core Idea: - Not just a wine app, but a taste discovery engine. - Goal:
+learn user preferences with minimal input (like/dislike).
+
+Core Loop: Scan → Feedback → Recommendation → Repeat
+
+Key Inspirations: - Vivino: database + ratings (utility) - sip.wine:
+gamification + fun (engagement)
+
+AI Role: - Taste profiling (implicit learning from behavior) -
+Recommendation engine (Spotify-like) - Future: label recognition (OCR),
+dynamic challenges
+
+Current MVP: - Frontend only (Next.js) - No backend, no auth, no
+database - Focus: validating user engagement
+
+Main Insight: - Product is not yet monetizable → that is OK. - Current
+phase = engagement + data collection.
+
+User Context: - Waiters won’t use it (no time) - Guests will use it
+while waiting → entertainment + discovery
+
+Business Model Options: 1. Affiliate wine sales (like Vivino) 2. Data
+insights (B2B for wineries/distributors) 3. Premium features (advanced
+taste profile, journeys)
+
+Current Goal: - Validate retention, not revenue
+
+Next Product Step: - Build “Taste Progress”: - Show user patterns
+(e.g. “You like light wines”) - Add progression feeling - Increase
+engagement and repeat usage

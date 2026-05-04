@@ -4,44 +4,77 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { TasteProfileCard } from "@/components/TasteProfileCard";
+import { matchWine } from "@/lib/semanticWineMatch";
+import type { SemanticWineMatch } from "@/lib/semanticWineMatch";
 import { buildTasteProfile, type LikedWine } from "@/lib/tasteProfile";
 
 type Step = "home" | "camera" | "result" | "feedback";
 
-const MOCK_WINE = {
-  name: "Les Hauts Verdots Sauvignon Blanc",
-  region: "Loire Valley, France",
-  description: "Bright citrus and green apple — crisp and refreshing.",
-  tags: ["light", "fruity", "white"] as const,
+type WineData = {
+  name: string;
+  region: string;
+  description: string;
+  tags: string[];
 };
 
 const RECOMMENDATIONS = [
   {
     tier: "safe" as const,
-    name: "Kim Crawford Sauvignon Blanc",
-    detail: "Popular Marlborough pour — reliable citrus zip.",
+    name: "Juhasz Egri Bikaver",
+    detail: "Widely available in Tesco/Auchan - reliable spicy red value pick.",
+    tags: ["dry", "spicy", "bold", "fruity"],
   },
   {
     tier: "premium" as const,
-    name: "Domaine Vacheron Sancerre",
-    detail: "Linear minerality; a step up for weeknight splurge.",
+    name: "Sauska Tokaji Dry Furmint",
+    detail: "Crisp, mineral Hungarian white - premium but still approachable.",
+    tags: ["dry", "acidic", "mineral", "light"],
   },
   {
     tier: "explore" as const,
-    name: "Ameztoi Txakoli",
-    detail: "Spritzy Basque white — low ABV, high fun.",
+    name: "Planeta Nero d'Avola (Lidl import)",
+    detail: "Budget Sicilian import with ripe plum and bolder body for experimenting.",
+    tags: ["bold", "fruity", "dry", "spicy"],
   },
 ];
 
+function getTagOverlapScore(preferredTagWeights: Record<string, number>, wineTags: string[]): number {
+  return wineTags.reduce((sum, tag) => sum + (preferredTagWeights[tag] ?? 0), 0);
+}
+
+function explorerBadgeLabel(level: number): string | null {
+  if (level >= 10) return "Wine explorer";
+  if (level >= 5) return "Curious taster";
+  if (level >= 3) return "Getting started";
+  return null;
+}
+
+/** Fills toward Lv.10 (matches top “Wine explorer” tier). */
+function explorerLevelProgressPercent(level: number): number {
+  const cap = 10;
+  if (level <= 0) return 0;
+  return Math.min(100, Math.round((level / cap) * 100));
+}
+
 export function WineFlow() {
+  const profileStorageKey = "wineProfile";
   const [step, setStep] = useState<Step>("home");
   const [captureUrl, setCaptureUrl] = useState<string | null>(null);
   const [likedWines, setLikedWines] = useState<LikedWine[]>([]);
+  const [winesTriedThisSession, setWinesTriedThisSession] = useState(0);
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false);
+  const [prevLevel, setPrevLevel] = useState(0);
+  const [levelUpMessage, setLevelUpMessage] = useState<string | null>(null);
   const [showRecs, setShowRecs] = useState(false);
   const [vote, setVote] = useState<"up" | "down" | null>(null);
+  const [scannedWine, setScannedWine] = useState<WineData | null>(null);
+  const [semanticResult, setSemanticResult] = useState<SemanticWineMatch>(null);
+  const [scanning, setScanning] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const prevLevelGateRef = useRef(0);
 
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -82,7 +115,115 @@ export function WineFlow() {
     };
   }, [step, stopCamera]);
 
-  const handleCapture = () => {
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(profileStorageKey);
+      if (!raw) return;
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return;
+
+      const data = parsed as {
+        likedWines?: unknown;
+        session?: unknown;
+      };
+
+      const restoredLikedWines = Array.isArray(data.likedWines)
+        ? data.likedWines.filter(
+            (wine): wine is LikedWine =>
+              !!wine &&
+              typeof wine === "object" &&
+              "name" in wine &&
+              typeof wine.name === "string" &&
+              "tags" in wine &&
+              Array.isArray(wine.tags) &&
+              wine.tags.every((tag: unknown) => typeof tag === "string"),
+          )
+        : [];
+
+      const restoredSession =
+        typeof data.session === "number" && Number.isFinite(data.session) && data.session >= 0
+          ? Math.floor(data.session)
+          : 0;
+
+      if (restoredLikedWines.length > 0 || restoredSession > 0) {
+        setLikedWines(restoredLikedWines);
+        setWinesTriedThisSession(restoredSession);
+        prevLevelGateRef.current = restoredSession;
+        setPrevLevel(restoredSession);
+        setShowWelcomeBack(true);
+      }
+    } catch {
+      // Ignore invalid localStorage content and start fresh.
+    }
+  }, [profileStorageKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        profileStorageKey,
+        JSON.stringify({
+          likedWines,
+          session: winesTriedThisSession,
+        }),
+      );
+    } catch {
+      // Ignore write failures (e.g. storage unavailable).
+    }
+  }, [likedWines, winesTriedThisSession, profileStorageKey]);
+
+  useEffect(() => {
+    const level = winesTriedThisSession;
+    const prev = prevLevelGateRef.current;
+    if (level <= prev) return;
+
+    const msg =
+      level === 3
+        ? "🎉 You're getting started!"
+        : level === 5
+          ? "🔥 Curious taster!"
+          : level === 10
+            ? "🚀 Wine explorer!"
+            : null;
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (msg) {
+      setLevelUpMessage(msg);
+      timeoutId = setTimeout(() => setLevelUpMessage(null), 2000);
+    }
+
+    prevLevelGateRef.current = level;
+    setPrevLevel(level);
+
+    return () => {
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
+  }, [winesTriedThisSession]);
+
+  useEffect(() => {
+    if (!scannedWine?.description) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const semanticMatch = await matchWine(scannedWine.description);
+        if (!cancelled) {
+          setSemanticResult(semanticMatch);
+          console.log("Semantic wine match:", JSON.stringify(semanticMatch, null, 2));
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setSemanticResult(null);
+          console.warn("Semantic wine match failed:", error);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [scannedWine]);
+
+  const handleCapture = async () => {
     const video = videoRef.current;
     if (!video || video.videoWidth === 0) return;
 
@@ -92,16 +233,57 @@ export function WineFlow() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.drawImage(video, 0, 0);
-    setCaptureUrl(canvas.toDataURL("image/jpeg", 0.85));
-    setStep("result");
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+    setCaptureUrl(dataUrl);
+    setScannedWine(null);
+    setSemanticResult(null);
+    setScanError(null);
+    setScanning(true);
     setShowRecs(false);
+    setStep("result");
+
+    try {
+      const res = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl }),
+      });
+      const data = await res.json() as WineData & { error?: string };
+      if (!res.ok || data.error) {
+        setScanError(data.error ?? "Could not identify wine");
+      } else {
+        setScannedWine(data);
+      }
+    } catch {
+      setScanError("Network error — try again");
+    } finally {
+      setScanning(false);
+    }
   };
 
   const tasteProfile = buildTasteProfile(likedWines);
   const likedCount = likedWines.length;
+  const explorerBadge = explorerBadgeLabel(winesTriedThisSession);
+  const explorerLevelBarPct = explorerLevelProgressPercent(winesTriedThisSession);
+  const preferredTagWeights = likedWines.reduce<Record<string, number>>((acc, wine) => {
+    for (const tag of wine.tags) {
+      acc[tag] = (acc[tag] ?? 0) + 1;
+    }
+    return acc;
+  }, {});
+  const rankedRecommendations = [...RECOMMENDATIONS].sort((a, b) => {
+    const scoreDiff = getTagOverlapScore(preferredTagWeights, b.tags) - getTagOverlapScore(preferredTagWeights, a.tags);
+    if (scoreDiff !== 0) return scoreDiff;
+    return a.name.localeCompare(b.name);
+  });
 
   const resetFlow = () => {
     setCaptureUrl(null);
+    setScannedWine(null);
+    setSemanticResult(null);
+    setScanError(null);
+    setScanning(false);
     setShowRecs(false);
     setVote(null);
     setStep("home");
@@ -118,11 +300,18 @@ export function WineFlow() {
         </h1>
       </header>
 
+      {showWelcomeBack ? (
+        <section className="rounded-2xl border border-[var(--border)] bg-white/80 px-4 py-3 text-center shadow-sm">
+          <p className="text-sm font-semibold text-[var(--ink)]">Welcome back 🍷</p>
+          <p className="text-xs text-[var(--muted)]">Your taste profile is evolving</p>
+        </section>
+      ) : null}
+
       {step === "home" && (
         <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6 py-12">
           <p className="max-w-[260px] text-center text-sm leading-relaxed text-[var(--muted)]">
-            Point your camera at any bottle — we&apos;ll show a demo match and
-            learn what you like.
+            Point your camera at any bottle — we&apos;ll identify it and learn
+            what you like.
           </p>
           <button
             type="button"
@@ -173,23 +362,42 @@ export function WineFlow() {
             />
           </div>
 
-          <article className="rounded-2xl border border-[var(--border)] bg-white px-4 py-5 shadow-sm">
-            <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
-              Match (demo)
-            </p>
-            <h2 className="mt-1 text-xl font-semibold">{MOCK_WINE.name}</h2>
-            <p className="mt-1 text-sm text-[var(--muted)]">{MOCK_WINE.region}</p>
-            <p className="mt-3 text-sm leading-relaxed">{MOCK_WINE.description}</p>
-          </article>
+          {scanning && (
+            <div className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-white px-4 py-5 shadow-sm">
+              <svg className="h-4 w-4 animate-spin text-[var(--accent)]" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+              <p className="text-sm text-[var(--muted)]">Identifying wine…</p>
+            </div>
+          )}
+
+          {scanError && !scanning && (
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-5 shadow-sm">
+              <p className="text-sm font-medium text-red-700">{scanError}</p>
+            </div>
+          )}
+
+          {scannedWine && !scanning && (
+            <article className="rounded-2xl border border-[var(--border)] bg-white px-4 py-5 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
+                Identified
+              </p>
+              <h2 className="mt-1 text-xl font-semibold">{scannedWine.name}</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">{scannedWine.region}</p>
+              <p className="mt-3 text-sm leading-relaxed">{scannedWine.description}</p>
+            </article>
+          )}
 
           <button
             type="button"
+            disabled={scanning}
             onClick={() => {
               setVote(null);
               setShowRecs(false);
               setStep("feedback");
             }}
-            className="rounded-full bg-[var(--accent)] px-6 py-4 text-center text-base font-semibold text-white transition duration-150 active:scale-95"
+            className="rounded-full bg-[var(--accent)] px-6 py-4 text-center text-base font-semibold text-white transition duration-150 active:scale-95 disabled:opacity-40"
           >
             Continue
           </button>
@@ -210,10 +418,17 @@ export function WineFlow() {
               onClick={() => {
                 if (vote) return;
                 setVote("up");
-                setLikedWines((prev) => [
-                  ...prev,
-                  { name: MOCK_WINE.name, tags: [...MOCK_WINE.tags] },
-                ]);
+                setWinesTriedThisSession((n) => n + 1);
+                if (scannedWine) {
+                  const tagsToUse =
+                    semanticResult && semanticResult.tags.length > 0
+                      ? semanticResult.tags
+                      : scannedWine.tags;
+                  setLikedWines((prev) => [
+                    ...prev,
+                    { name: scannedWine.name, tags: [...tagsToUse] },
+                  ]);
+                }
                 setShowRecs(true);
               }}
             >
@@ -227,12 +442,23 @@ export function WineFlow() {
               onClick={() => {
                 if (vote) return;
                 setVote("down");
+                setWinesTriedThisSession((n) => n + 1);
                 setShowRecs(false);
               }}
             >
               👎
             </button>
           </div>
+
+          {levelUpMessage && vote === "down" ? (
+            <p
+              className="motion-safe:animate-screen-in text-center text-base font-semibold text-violet-600"
+              role="status"
+              aria-live="polite"
+            >
+              {levelUpMessage}
+            </p>
+          ) : null}
 
           {vote === "down" ? (
             <p className="text-center text-sm text-[var(--muted)]">
@@ -242,13 +468,45 @@ export function WineFlow() {
 
           {showRecs && vote === "up" ? (
             <section className="animate-card-in space-y-4 rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
+              {levelUpMessage ? (
+                <p
+                  className="motion-safe:animate-screen-in text-center text-base font-semibold text-violet-600"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {levelUpMessage}
+                </p>
+              ) : null}
+              <div className="space-y-2 border-b border-[var(--border)] pb-4 text-center">
+                <p className="text-sm font-semibold text-[var(--ink)]">
+                  🍷 Wine Explorer Lv. {winesTriedThisSession}
+                </p>
+                {explorerBadge ? (
+                  <p className="text-xs font-medium text-[var(--muted)]">
+                    {explorerBadge}
+                  </p>
+                ) : null}
+                <div
+                  className="mx-auto h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-[var(--border)]"
+                  role="progressbar"
+                  aria-valuenow={Math.min(winesTriedThisSession, 10)}
+                  aria-valuemin={0}
+                  aria-valuemax={10}
+                  aria-label="Wine explorer level progress"
+                >
+                  <div
+                    className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
+                    style={{ width: `${explorerLevelBarPct}%` }}
+                  />
+                </div>
+              </div>
               <TasteProfileCard profile={tasteProfile} />
               <ProgressIndicator likedCount={likedCount} />
               <p className="text-sm font-medium text-[var(--ink)]">
                 Because you liked this style
               </p>
               <ul className="space-y-3">
-                {RECOMMENDATIONS.map((wine) => (
+                {rankedRecommendations.map((wine) => (
                   <RecommendationCard
                     key={wine.name}
                     name={wine.name}
@@ -261,13 +519,30 @@ export function WineFlow() {
           ) : null}
 
           {vote !== null ? (
-            <button
-              type="button"
-              onClick={resetFlow}
-              className="rounded-full border border-[var(--border)] bg-white py-3 text-sm font-medium text-[var(--ink)] transition duration-150 active:scale-95"
-            >
-              Scan another bottle
-            </button>
+            <div className="flex flex-col gap-3 pt-1">
+              {likedWines.length >= 3 ? (
+                <p
+                  className="text-center text-sm font-medium text-[var(--ink)]"
+                  role="status"
+                >
+                  🍷 Your taste profile is forming
+                </p>
+              ) : null}
+              <p className="text-center text-sm leading-relaxed text-[var(--muted)]">
+                You&apos;re getting closer to your perfect wine
+              </p>
+              <p className="text-center text-xs text-[var(--muted)]">
+                You&apos;ve tried {winesTriedThisSession}{" "}
+                {winesTriedThisSession === 1 ? "wine" : "wines"} in this session
+              </p>
+              <button
+                type="button"
+                onClick={resetFlow}
+                className="rounded-full border border-[var(--border)] bg-white py-3.5 text-sm font-semibold text-[var(--ink)] transition duration-150 active:scale-95"
+              >
+                Refine your taste 🍷
+              </button>
+            </div>
           ) : null}
         </div>
       )}

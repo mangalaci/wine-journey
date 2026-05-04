@@ -1,0 +1,92 @@
+WINE APP PRODUCT SUMMARY – V2
+
+Core Idea:
+- Not just a wine app, but a taste discovery engine
+- Goal: learn user preferences with minimal input (like/dislike) and translate them into meaningful recommendations
+
+Core Loop:
+Scan → Interpret → Feedback → Recommendation → Repeat
+
+(Note: "Interpret" is now a key step enabled by semantic AI, not just static data)
+
+Key Inspirations:
+- Vivino: database + ratings (utility)
+- sip.wine: gamification + fun (engagement)
+- NEW: semantic recommendation systems (Spotify-like taste inference)
+
+AI Role:
+- Taste profiling (implicit learning from behavior)
+- Recommendation engine (similarity-based, not rule-based)
+- Semantic interpretation of wines (embedding + similarity)
+- OCR-based label understanding
+
+Future:
+- Dynamic explanations (“why this wine”)
+- Adaptive challenges
+- Cross-user taste comparison
+
+Current System (evolved from MVP):
+- Next.js app with integrated backend routes
+- Semantic engine using embeddings + similarity
+- Small curated reference set (not full database)
+- No authentication, no persistence yet
+- Focus: validating intelligent behavior, not just UI
+
+System Architecture (NEW CORE):
+
+OCR → AI description → embedding → similarity → reference wine → tags → taste profile → recommendation
+
+This replaces earlier mock / rule-based logic.
+
+Main Insight:
+- The product is not limited by AI capability anymore
+- The main constraint is now data quality (tag consistency and mapping)
+- Product is still not monetizable → this is OK
+- Current phase = engagement + learning system validation
+
+User Context:
+- Waiters won’t use it (no time)
+- Guests will use it while waiting
+→ positioning: entertainment + discovery
+
+Business Model Options:
+1. Affiliate wine sales (like Vivino)
+2. Data insights (B2B for wineries/distributors)
+3. Premium features:
+   - advanced taste profile
+   - guided taste journeys
+
+Current Goal:
+- Validate retention
+- Validate that recommendations feel “intelligent”
+- Validate that users trust the system
+
+(Not revenue-focused yet)
+
+Current Bottleneck (NEW):
+- Recommendation quality depends on:
+  - accurate wine tagging
+  - consistent tag vocabulary
+- Mismatch between taste profile and recommendations reduces perceived intelligence
+
+Next Product Step:
+
+1. Improve recommendation quality:
+   - Normalize tag system
+   - Improve wine tagging
+   - Match recommendations via tag overlap
+
+2. Introduce confidence handling:
+   - Use similarity score to filter weak matches
+
+3. Add explanation layer:
+   - “Recommended because you like sweet wines”
+   - “Based on wines similar to Tokaji Aszú”
+
+4. Strengthen perception of intelligence (UX)
+
+Summary:
+The product has evolved from a simple MVP into a semantic, AI-driven taste system.
+
+The challenge is no longer building features,
+but improving decision quality through better data alignment and interpretation.

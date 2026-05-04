@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\laci\\\\projects\\\\tarsashaz_assistant\\\\.venv\\\\Lib\\\\site-packages\" -Name | Where-Object {$_ -notmatch \"^__pycache__\" -and $_ -notmatch \"\\\\.dist-info$\"} | Sort-Object)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\tarsashaz_assistant\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Head -100)",
+      "Bash(dir /s /b)",
+      "Bash(dir \"C:\\\\Users\\\\laci\\\\projects\\\\tarsashaz_assistant\" /A)",
+      "Bash(Select-Object -First 30)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\tarsashaz_assistant\" -Force)",
+      "Bash(Select-Object Name)",
+      "Bash(powershell -Command \"Get-ChildItem -Force\")",
+      "Bash(dir /AD /B)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\wine\" -Recurse -Force)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\tarsashaz_assistant\" -Recurse -Force -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(@\\(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\tarsashaz_assistant\" -Depth 0 -Force | Where-Object {$_.PSIsContainer -eq $false}\\) | ForEach-Object {$_.Name})",
+      "PowerShell(@\\(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\tarsashaz_assistant\" -Depth 0 -Force\\) | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Dir'}else{'File'}}})",
+      "Bash(dir \"C:\\\\Users\\\\laci\\\\projects\\\\tarsashaz_assistant\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\hackathon\\\\virtual-eyewear-tryon\" -Recurse -Force)",
+      "PowerShell(head *)",
+      "Bash(dir \"C:\\\\Users\\\\laci\\\\projects\\\\hackathon\\\\virtual-eyewear-tryon\")",
+      "Bash(findstr /E \"\\(py|txt|env|config\\)\")",
+      "Bash(npm install *)",
+      "Bash(npm list *)",
+      "PowerShell(New-Item *)"
+    ]
+  }
+}
