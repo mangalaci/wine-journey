@@ -7,6 +7,8 @@ import { TasteProfileCard } from "@/components/TasteProfileCard";
 import { matchWine } from "@/lib/semanticWineMatch";
 import type { SemanticWineMatch } from "@/lib/semanticWineMatch";
 import { buildTasteProfile, type LikedWine } from "@/lib/tasteProfile";
+import { buildTasteRadar } from "@/lib/tasteRadar";
+import { WINE_REFERENCE } from "@/lib/wineReference";
 
 type Step = "home" | "camera" | "result" | "feedback";
 
@@ -17,29 +19,24 @@ type WineData = {
   tags: string[];
 };
 
-const RECOMMENDATIONS = [
-  {
-    tier: "safe" as const,
-    name: "Juhasz Egri Bikaver",
-    detail: "Widely available in Tesco/Auchan - reliable spicy red value pick.",
-    tags: ["dry", "spicy", "bold", "fruity"],
-  },
-  {
-    tier: "premium" as const,
-    name: "Sauska Tokaji Dry Furmint",
-    detail: "Crisp, mineral Hungarian white - premium but still approachable.",
-    tags: ["dry", "acidic", "mineral", "light"],
-  },
-  {
-    tier: "explore" as const,
-    name: "Planeta Nero d'Avola (Lidl import)",
-    detail: "Budget Sicilian import with ripe plum and bolder body for experimenting.",
-    tags: ["bold", "fruity", "dry", "spicy"],
-  },
-];
 
-function getTagOverlapScore(preferredTagWeights: Record<string, number>, wineTags: string[]): number {
-  return wineTags.reduce((sum, tag) => sum + (preferredTagWeights[tag] ?? 0), 0);
+const TASTE_TAGS = [
+  "sweet",
+  "dry",
+  "fruity",
+  "spicy",
+  "acidic",
+  "bold",
+  "light",
+  "mineral",
+  "tannic",
+  "fresh",
+] as const;
+type TasteTag = (typeof TASTE_TAGS)[number];
+const TASTE_TAG_SET = new Set<string>(TASTE_TAGS);
+
+function getTagOverlapScore(preferredTags: Set<string>, wineTags: string[]): number {
+  return wineTags.reduce((sum, tag) => sum + (preferredTags.has(tag) ? 1 : 0), 0);
 }
 
 function explorerBadgeLabel(level: number): string | null {
@@ -61,6 +58,7 @@ export function WineFlow() {
   const [step, setStep] = useState<Step>("home");
   const [captureUrl, setCaptureUrl] = useState<string | null>(null);
   const [likedWines, setLikedWines] = useState<LikedWine[]>([]);
+  const [dislikedWines, setDislikedWines] = useState<LikedWine[]>([]);
   const [winesTriedThisSession, setWinesTriedThisSession] = useState(0);
   const [showWelcomeBack, setShowWelcomeBack] = useState(false);
   const [prevLevel, setPrevLevel] = useState(0);
@@ -71,6 +69,7 @@ export function WineFlow() {
   const [semanticResult, setSemanticResult] = useState<SemanticWineMatch>(null);
   const [scanning, setScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [mode, setMode] = useState<"for_you" | "explore">("for_you");
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -124,21 +123,26 @@ export function WineFlow() {
 
       const data = parsed as {
         likedWines?: unknown;
+        dislikedWines?: unknown;
         session?: unknown;
       };
 
-      const restoredLikedWines = Array.isArray(data.likedWines)
-        ? data.likedWines.filter(
-            (wine): wine is LikedWine =>
-              !!wine &&
-              typeof wine === "object" &&
-              "name" in wine &&
-              typeof wine.name === "string" &&
-              "tags" in wine &&
-              Array.isArray(wine.tags) &&
-              wine.tags.every((tag: unknown) => typeof tag === "string"),
-          )
-        : [];
+      const restoreWineArray = (raw: unknown): LikedWine[] =>
+        Array.isArray(raw)
+          ? raw.filter(
+              (wine): wine is LikedWine =>
+                !!wine &&
+                typeof wine === "object" &&
+                "name" in wine &&
+                typeof wine.name === "string" &&
+                "tags" in wine &&
+                Array.isArray(wine.tags) &&
+                wine.tags.every((tag: unknown) => typeof tag === "string"),
+            )
+          : [];
+
+      const restoredLikedWines = restoreWineArray(data.likedWines);
+      const restoredDislikedWines = restoreWineArray(data.dislikedWines);
 
       const restoredSession =
         typeof data.session === "number" && Number.isFinite(data.session) && data.session >= 0
@@ -147,6 +151,7 @@ export function WineFlow() {
 
       if (restoredLikedWines.length > 0 || restoredSession > 0) {
         setLikedWines(restoredLikedWines);
+        setDislikedWines(restoredDislikedWines);
         setWinesTriedThisSession(restoredSession);
         prevLevelGateRef.current = restoredSession;
         setPrevLevel(restoredSession);
@@ -163,13 +168,14 @@ export function WineFlow() {
         profileStorageKey,
         JSON.stringify({
           likedWines,
+          dislikedWines,
           session: winesTriedThisSession,
         }),
       );
     } catch {
       // Ignore write failures (e.g. storage unavailable).
     }
-  }, [likedWines, winesTriedThisSession, profileStorageKey]);
+  }, [likedWines, dislikedWines, winesTriedThisSession, profileStorageKey]);
 
   useEffect(() => {
     const level = winesTriedThisSession;
@@ -263,20 +269,68 @@ export function WineFlow() {
   };
 
   const tasteProfile = buildTasteProfile(likedWines);
+  const tasteRadar = buildTasteRadar(likedWines, dislikedWines);
   const likedCount = likedWines.length;
   const explorerBadge = explorerBadgeLabel(winesTriedThisSession);
   const explorerLevelBarPct = explorerLevelProgressPercent(winesTriedThisSession);
-  const preferredTagWeights = likedWines.reduce<Record<string, number>>((acc, wine) => {
+  const userPreferredTags = new Set<TasteTag>();
+  for (const wine of likedWines) {
     for (const tag of wine.tags) {
-      acc[tag] = (acc[tag] ?? 0) + 1;
+      if (TASTE_TAG_SET.has(tag)) {
+        userPreferredTags.add(tag as TasteTag);
+      }
     }
-    return acc;
-  }, {});
-  const rankedRecommendations = [...RECOMMENDATIONS].sort((a, b) => {
-    const scoreDiff = getTagOverlapScore(preferredTagWeights, b.tags) - getTagOverlapScore(preferredTagWeights, a.tags);
-    if (scoreDiff !== 0) return scoreDiff;
-    return a.name.localeCompare(b.name);
-  });
+  }
+
+  const tagCounts = new Map<string, number>();
+  for (const wine of likedWines) {
+    for (const tag of wine.tags) {
+      if (TASTE_TAG_SET.has(tag)) {
+        tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+      }
+    }
+  }
+  const primaryTags = new Set<string>();
+  if (tagCounts.size > 0) {
+    let maxCount = 0;
+    tagCounts.forEach((c) => {
+      if (c > maxCount) maxCount = c;
+    });
+    tagCounts.forEach((c, tag) => {
+      if (c === maxCount) primaryTags.add(tag);
+    });
+  }
+
+  const userDislikedTags = new Set<string>();
+  for (const wine of dislikedWines) {
+    for (const tag of wine.tags) {
+      if (TASTE_TAG_SET.has(tag)) userDislikedTags.add(tag);
+    }
+  }
+
+  const excludedName = semanticResult?.name ?? null;
+  let recommendationPool = WINE_REFERENCE.filter((w) => w.name !== excludedName);
+  if (mode === "for_you" && primaryTags.size > 0) {
+    const filtered = recommendationPool.filter((w) => w.tags.some((t) => primaryTags.has(t)));
+    if (filtered.length > 0) recommendationPool = filtered;
+  }
+
+  const TIERS = ["safe", "premium", "explore"] as const;
+  const rankedRecommendations = [...recommendationPool]
+    .sort((a, b) => {
+      const scoreA = getTagOverlapScore(userPreferredTags, a.tags) - getTagOverlapScore(userDislikedTags, a.tags) * 0.5;
+      const scoreB = getTagOverlapScore(userPreferredTags, b.tags) - getTagOverlapScore(userDislikedTags, b.tags) * 0.5;
+      const scoreDiff = scoreB - scoreA;
+      if (scoreDiff !== 0) return scoreDiff;
+      return a.name.localeCompare(b.name);
+    })
+    .slice(0, 3)
+    .map((wine, index) => ({
+      ...wine,
+      tier: TIERS[index],
+      detail: wine.description,
+      matchedTags: wine.tags.filter((t) => userPreferredTags.has(t as TasteTag)),
+    }));
 
   const resetFlow = () => {
     setCaptureUrl(null);
@@ -389,18 +443,34 @@ export function WineFlow() {
             </article>
           )}
 
-          <button
-            type="button"
-            disabled={scanning}
-            onClick={() => {
-              setVote(null);
-              setShowRecs(false);
-              setStep("feedback");
-            }}
-            className="rounded-full bg-[var(--accent)] px-6 py-4 text-center text-base font-semibold text-white transition duration-150 active:scale-95 disabled:opacity-40"
-          >
-            Continue
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              disabled={scanning}
+              onClick={() => {
+                setCaptureUrl(null);
+                setScannedWine(null);
+                setSemanticResult(null);
+                setScanError(null);
+                setStep("camera");
+              }}
+              className="flex-1 rounded-full border border-[var(--border)] bg-white px-6 py-4 text-base font-semibold text-[var(--ink)] transition duration-150 active:scale-95 disabled:opacity-40"
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              disabled={scanning}
+              onClick={() => {
+                setVote(null);
+                setShowRecs(false);
+                setStep("feedback");
+              }}
+              className="flex-1 rounded-full bg-[var(--accent)] px-6 py-4 text-center text-base font-semibold text-white transition duration-150 active:scale-95 disabled:opacity-40"
+            >
+              Continue
+            </button>
+          </div>
         </div>
       )}
 
@@ -420,14 +490,15 @@ export function WineFlow() {
                 setVote("up");
                 setWinesTriedThisSession((n) => n + 1);
                 if (scannedWine) {
+                  const SEMANTIC_MIN_SCORE = 0.72;
                   const tagsToUse =
-                    semanticResult && semanticResult.tags.length > 0
+                    semanticResult && semanticResult.score >= SEMANTIC_MIN_SCORE && semanticResult.tags.length > 0
                       ? semanticResult.tags
                       : scannedWine.tags;
-                  setLikedWines((prev) => [
-                    ...prev,
-                    { name: scannedWine.name, tags: [...tagsToUse] },
-                  ]);
+                  setLikedWines((prev) => {
+                    if (prev.some((w) => w.name === scannedWine.name)) return prev;
+                    return [...prev, { name: scannedWine.name, tags: [...tagsToUse] }];
+                  });
                 }
                 setShowRecs(true);
               }}
@@ -443,6 +514,16 @@ export function WineFlow() {
                 if (vote) return;
                 setVote("down");
                 setWinesTriedThisSession((n) => n + 1);
+                if (scannedWine) {
+                  const tagsToUse =
+                    semanticResult && semanticResult.score >= 0.72 && semanticResult.tags.length > 0
+                      ? semanticResult.tags
+                      : scannedWine.tags;
+                  setDislikedWines((prev) => {
+                    if (prev.some((w) => w.name === scannedWine.name)) return prev;
+                    return [...prev, { name: scannedWine.name, tags: [...tagsToUse] }];
+                  });
+                }
                 setShowRecs(false);
               }}
             >
@@ -500,11 +581,38 @@ export function WineFlow() {
                   />
                 </div>
               </div>
-              <TasteProfileCard profile={tasteProfile} />
+              <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
               <ProgressIndicator likedCount={likedCount} />
               <p className="text-sm font-medium text-[var(--ink)]">
                 Because you liked this style
               </p>
+              <div className="flex flex-wrap items-center justify-center gap-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => setMode("for_you")}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                    mode === "for_you"
+                      ? "bg-[var(--accent)] text-white"
+                      : "text-[var(--muted)] hover:text-[var(--ink)]"
+                  }`}
+                >
+                  For you
+                </button>
+                <span className="text-[var(--muted)] text-xs" aria-hidden>
+                  |
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setMode("explore")}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                    mode === "explore"
+                      ? "bg-[var(--accent)] text-white"
+                      : "text-[var(--muted)] hover:text-[var(--ink)]"
+                  }`}
+                >
+                  Explore
+                </button>
+              </div>
               <ul className="space-y-3">
                 {rankedRecommendations.map((wine) => (
                   <RecommendationCard
@@ -512,6 +620,7 @@ export function WineFlow() {
                     name={wine.name}
                     detail={wine.detail}
                     tier={wine.tier}
+                    matchedTags={wine.matchedTags}
                   />
                 ))}
               </ul>
