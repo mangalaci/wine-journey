@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  profile      WineProfile?
+}
+
+model WineProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likedWines    Json     @default("[]")
+  dislikedWines Json     @default("[]")
+  sessionCount  Int      @default(0)
+  updatedAt     DateTime @updatedAt
+}

@@ -24,7 +24,24 @@
       "Bash(findstr /E \"\\(py|txt|env|config\\)\")",
       "Bash(npm install *)",
       "Bash(npm list *)",
-      "PowerShell(New-Item *)"
+      "PowerShell(New-Item *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\wine\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "PowerShell(git *)",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "PowerShell(netstat *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\laci\\\\projects\\\\palyapartner\" -Force)",
+      "PowerShell(ls \"C:\\\\Users\\\\laci\\\\projects\\\\palyapartner\" | ForEach-Object { $_.Name })",
+      "Bash(npx prisma *)",
+      "Bash(dir C:\\\\Users\\\\laci\\\\projects\\\\wine\\\\prisma *)",
+      "Bash(dir C:\\\\Users\\\\laci\\\\projects\\\\wine\\\\src\\\\generated *)",
+      "Bash(dir \"C:\\\\Users\\\\laci\\\\projects\\\\wine\\\\node_modules\\\\.prisma\" /b)",
+      "Bash(dir \"C:\\\\Users\\\\laci\\\\projects\\\\wine\\\\node_modules\\\\@prisma\\\\client\" /b)",
+      "Bash(dir C:\\\\Users\\\\laci\\\\projects\\\\wine\\\\src\\\\generated\\\\prisma *)",
+      "Bash(dir C:\\\\Users\\\\laci\\\\projects\\\\wine\\\\src\\\\app\\\\api\\\\auth *)"
     ]
   }
 }

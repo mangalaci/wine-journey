@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
+import { Onboarding } from "@/components/Onboarding";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { TasteProfileCard } from "@/components/TasteProfileCard";
@@ -54,7 +57,9 @@ function explorerLevelProgressPercent(level: number): number {
 }
 
 export function WineFlow() {
+  const { data: session } = useSession();
   const profileStorageKey = "wineProfile";
+  const [onboardingDone, setOnboardingDone] = useState(true);
   const [step, setStep] = useState<Step>("home");
   const [captureUrl, setCaptureUrl] = useState<string | null>(null);
   const [likedWines, setLikedWines] = useState<LikedWine[]>([]);
@@ -113,6 +118,11 @@ export function WineFlow() {
       stopCamera();
     };
   }, [step, stopCamera]);
+
+  useEffect(() => {
+    const seen = localStorage.getItem("onboardingDone");
+    setOnboardingDone(seen === "true");
+  }, []);
 
   useEffect(() => {
     try {
@@ -176,6 +186,50 @@ export function WineFlow() {
       // Ignore write failures (e.g. storage unavailable).
     }
   }, [likedWines, dislikedWines, winesTriedThisSession, profileStorageKey]);
+
+  // Backend szinkronizáció: betöltés bejelentkezéskor
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    (async () => {
+      try {
+        const res = await fetch("/api/profile");
+        if (!res.ok) return;
+        const data = await res.json() as {
+          likedWines?: LikedWine[];
+          dislikedWines?: LikedWine[];
+          sessionCount?: number;
+        };
+        if (Array.isArray(data.likedWines) && data.likedWines.length > 0) {
+          setLikedWines(data.likedWines);
+          setDislikedWines(Array.isArray(data.dislikedWines) ? data.dislikedWines : []);
+          const count = data.sessionCount ?? 0;
+          setWinesTriedThisSession(count);
+          prevLevelGateRef.current = count;
+          setPrevLevel(count);
+          setShowWelcomeBack(true);
+        }
+      } catch {
+        // Fallback to localStorage if backend unavailable.
+      }
+    })();
+  }, [session?.user?.id]);
+
+  // Backend szinkronizáció: mentés változáskor (csak bejelentkezve)
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const timeout = setTimeout(() => {
+      fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          likedWines,
+          dislikedWines,
+          sessionCount: winesTriedThisSession,
+        }),
+      }).catch(() => {});
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [session?.user?.id, likedWines, dislikedWines, winesTriedThisSession]);
 
   useEffect(() => {
     const level = winesTriedThisSession;
@@ -343,15 +397,43 @@ export function WineFlow() {
     setStep("home");
   };
 
+  if (!onboardingDone) {
+    return (
+      <Onboarding
+        onDone={() => {
+          localStorage.setItem("onboardingDone", "true");
+          setOnboardingDone(true);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-8">
-      <header className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
-          Sip & learn
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)]">
-          Wine scanner
-        </h1>
+      <header className="flex items-start justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
+            Sip & learn
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)]">
+            Wine scanner
+          </h1>
+        </div>
+        <div className="pt-1">
+          {session ? (
+            <button
+              type="button"
+              onClick={() => signOut()}
+              className="text-xs text-[var(--muted)] hover:text-[var(--ink)]"
+            >
+              Kilépés
+            </button>
+          ) : (
+            <Link href="/auth/login" className="text-xs font-medium text-[var(--accent)]">
+              Bejelentkezés
+            </Link>
+          )}
+        </div>
       </header>
 
       {showWelcomeBack ? (
