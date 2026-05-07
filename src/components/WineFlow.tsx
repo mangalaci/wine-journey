@@ -84,6 +84,9 @@ export function WineFlow() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [mode, setMode] = useState<"for_you" | "explore">("for_you");
   const [scanHistory, setScanHistory] = useState<ScanEntry[]>([]);
+  const [moodQuery, setMoodQuery] = useState("");
+  const [moodResults, setMoodResults] = useState<{ name: string; reason: string; tags: string[] }[]>([]);
+  const [moodLoading, setMoodLoading] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -475,6 +478,77 @@ export function WineFlow() {
               Scan wine
             </button>
           </div>
+
+          <section className="space-y-3">
+            <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
+              Find by mood
+            </p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!moodQuery.trim()) return;
+                setMoodLoading(true);
+                setMoodResults([]);
+                try {
+                  const res = await fetch("/api/mood-search", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: moodQuery }),
+                  });
+                  if (res.ok) {
+                    const data = await res.json() as { name: string; reason: string; tags: string[] }[];
+                    setMoodResults(data);
+                  }
+                } catch {
+                  // silently fail
+                } finally {
+                  setMoodLoading(false);
+                }
+              }}
+              className="flex gap-2"
+            >
+              <input
+                type="text"
+                value={moodQuery}
+                onChange={(e) => setMoodQuery(e.target.value)}
+                placeholder="pl. romantikus vacsora, nyári buli..."
+                className="flex-1 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              />
+              <button
+                type="submit"
+                disabled={moodLoading}
+                className="rounded-xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white transition disabled:opacity-50"
+              >
+                {moodLoading ? "…" : "→"}
+              </button>
+            </form>
+
+            {moodResults.length > 0 && (
+              <ul className="space-y-2">
+                {moodResults.map((wine) => (
+                  <li
+                    key={wine.name}
+                    className="rounded-xl border border-[var(--border)] bg-white px-4 py-3 shadow-sm"
+                  >
+                    <p className="text-sm font-semibold text-[var(--ink)]">{wine.name}</p>
+                    <p className="mt-0.5 text-xs text-[var(--muted)]">{wine.reason}</p>
+                    {wine.tags.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {wine.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full bg-[var(--border)] px-2 py-0.5 text-xs text-[var(--muted)]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
           {scanHistory.length > 0 && (
             <section className="space-y-3">
