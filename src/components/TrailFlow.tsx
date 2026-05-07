@@ -390,7 +390,8 @@ export function TrailFlow() {
         {step === "scan" && (
           <div className="animate-screen-in flex flex-1 flex-col gap-4">
             <p className="text-center text-sm text-[var(--muted)]">Irányítsd a kamerát a palackra</p>
-            <div className="relative w-full overflow-hidden rounded-3xl border border-[var(--border)] bg-black shadow-xl" style={{ height: "65vh" }}>
+            <div className="relative mx-auto overflow-hidden rounded-3xl border border-[var(--border)] bg-black shadow-xl"
+                 style={{ width: "min(100%, calc(65vh * 3 / 4))", aspectRatio: "3/4" }}>
               <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="h-48 w-32 rounded-2xl border-2 border-white/60" />
