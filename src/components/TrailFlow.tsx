@@ -20,13 +20,24 @@ type TrailStep =
   | "milestone"
   | "palate_reveal"
   | "suggestion"
-  | "show_suggestion";
+  | "show_suggestion"
+  | "itallap"
+  | "itallap_identifying"
+  | "itallap_result";
 
 type WineData = {
   name: string;
   region: string;
   description: string;
   tags: string[];
+};
+
+type ItallapWine = {
+  name: string;
+  region: string;
+  description: string;
+  tags: string[];
+  score: number;
 };
 
 type ScanEntry = {
@@ -187,6 +198,7 @@ export function TrailFlow() {
   const [dislikedWines, setDislikedWines] = useState<LikedWine[]>([]);
   const [winesTriedTotal, setWinesTriedTotal] = useState(0);
   const [scanHistory, setScanHistory] = useState<ScanEntry[]>([]);
+  const [itallapWines, setItallapWines] = useState<ItallapWine[]>([]);
 
   // Camera
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -207,7 +219,7 @@ export function TrailFlow() {
 
   // ── Camera ──
   useEffect(() => {
-    if (step !== "scan") { stopCamera(); return; }
+    if (step !== "scan" && step !== "itallap") { stopCamera(); return; }
     let cancelled = false;
     (async () => {
       try {
@@ -356,6 +368,46 @@ export function TrailFlow() {
     }
   };
 
+  const handleItallapCapture = async () => {
+    const video = videoRef.current;
+    if (!video || video.videoWidth === 0) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d")?.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    setCaptureUrl(dataUrl);
+    setItallapWines([]);
+    setStep("itallap_identifying");
+    try {
+      const res = await fetch("/api/itallap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl }),
+      });
+      const data = await res.json() as unknown;
+      if (!Array.isArray(data)) {
+        setScanError((data as { error?: string }).error ?? "Nem sikerült olvasni a borlapot");
+        setStep("welcome");
+        return;
+      }
+      const wines = data as Array<{ name: string; region: string; description: string; tags: string[] }>;
+      const liked = new Set(likedWines.flatMap((w) => w.tags));
+      const disliked = new Set(dislikedWines.flatMap((w) => w.tags));
+      const scored: ItallapWine[] = wines
+        .map((w) => ({
+          ...w,
+          score: w.tags.reduce((s, t) => s + (liked.has(t) ? 1 : 0) - (disliked.has(t) ? 0.5 : 0), 0),
+        }))
+        .sort((a, b) => b.score - a.score);
+      setItallapWines(scored);
+      setStep("itallap_result");
+    } catch {
+      setScanError("Hálózati hiba — próbáld újra");
+      setStep("welcome");
+    }
+  };
+
   const continueTrail = () => {
     setCaptureUrl(null);
     setScannedWine(null);
@@ -431,22 +483,29 @@ export function TrailFlow() {
 
             <WineGlassHero onTap={startTrail} label={isFirstVisit ? "Kezdjük!" : "Folytatom"} />
 
-            {scanHistory.length > 0 ? (
-              <div className="w-full space-y-2">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Legutóbb</p>
-                {scanHistory.slice(0, 2).map((entry) => (
-                  <div key={entry.id} className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-white/70 px-3 py-2 shadow-sm">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-[var(--ink)]">{entry.wineName}</p>
-                      <p className="truncate text-xs text-[var(--muted)]">{entry.wineRegion}</p>
+            <div className="w-full space-y-3">
+              {scanHistory.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Legutóbb</p>
+                  {scanHistory.slice(0, 2).map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-white/70 px-3 py-2 shadow-sm">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-[var(--ink)]">{entry.wineName}</p>
+                        <p className="truncate text-xs text-[var(--muted)]">{entry.wineRegion}</p>
+                      </div>
+                      <span className="ml-2 text-base">{entry.vote === "up" ? "👍" : "👎"}</span>
                     </div>
-                    <span className="ml-2 text-base">{entry.vote === "up" ? "👍" : "👎"}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-16" />
-            )}
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setStep("itallap")}
+                className="w-full rounded-xl border border-[var(--border)] bg-white/70 py-3 text-sm font-medium text-[var(--accent)] shadow-sm active:scale-95 transition-transform"
+              >
+                📋 Étteremben vagy? Borlap fotózása
+              </button>
+            </div>
           </div>
         )}
 
@@ -680,6 +739,115 @@ export function TrailFlow() {
             >
               <span className="text-3xl mb-1">📷</span>
               <span className="text-base font-bold">Következő bor →</span>
+            </button>
+          </div>
+        )}
+        {/* ITALLAP CAMERA */}
+        {step === "itallap" && (
+          <div className="animate-screen-in flex flex-1 flex-col gap-4">
+            <div className="text-center">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">Borlap</p>
+              <h2 className="mt-1 text-lg font-bold text-[var(--ink)]">Fotózd le az éttermi borlapot</h2>
+              <p className="mt-1 text-xs text-[var(--muted)]">Az egész lapot próbáld befogni</p>
+            </div>
+            <div
+              className="relative mx-auto overflow-hidden rounded-3xl border border-[var(--border)] bg-black shadow-xl"
+              style={{ width: "min(100%, calc(65vh * 3 / 4))", aspectRatio: "3/4" }}
+            >
+              <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setStep("welcome")}
+                className="flex-1 rounded-2xl border border-[var(--border)] bg-white py-3.5 text-sm font-medium text-[var(--ink)] active:scale-95 transition-transform"
+              >
+                Vissza
+              </button>
+              <button
+                type="button"
+                onClick={handleItallapCapture}
+                className="flex-1 rounded-2xl bg-[var(--accent)] py-3.5 text-sm font-bold text-white active:scale-95 transition-transform"
+              >
+                Fotózás
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ITALLAP IDENTIFYING */}
+        {step === "itallap_identifying" && (
+          <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6">
+            {captureUrl && (
+              <div className="w-full overflow-hidden rounded-3xl border border-[var(--border)] shadow-lg">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={captureUrl} alt="Borlap" className="aspect-[4/3] w-full object-cover" />
+              </div>
+            )}
+            <div className="flex items-center gap-3">
+              <svg className="h-5 w-5 animate-spin text-[var(--accent)]" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+              <p className="text-sm text-[var(--muted)]">Borlap feldolgozása…</p>
+            </div>
+          </div>
+        )}
+
+        {/* ITALLAP RESULT */}
+        {step === "itallap_result" && itallapWines.length > 0 && (
+          <div className="animate-screen-in flex flex-1 flex-col gap-4">
+            <div className="text-center">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">Borlap</p>
+              <h2 className="mt-1 text-xl font-bold text-[var(--ink)]">
+                {likedWines.length > 0 ? "A te borlapod" : `${itallapWines.length} bor a lapon`}
+              </h2>
+              {likedWines.length > 0 && (
+                <p className="mt-1 text-xs text-[var(--muted)]">Az ízlésedhez illesztve</p>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2">
+              {itallapWines.map((wine, i) => (
+                <article
+                  key={i}
+                  className={`rounded-2xl border px-4 py-3 shadow-sm ${
+                    i === 0 && likedWines.length > 0
+                      ? "border-[var(--accent)] bg-[var(--accent-soft)]"
+                      : "border-[var(--border)] bg-white"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-[var(--ink)] leading-tight">{wine.name}</p>
+                      <p className="text-xs text-[var(--muted)]">{wine.region}</p>
+                    </div>
+                    {i === 0 && likedWines.length > 0 && (
+                      <span className="shrink-0 rounded-full bg-[var(--accent)] px-2 py-0.5 text-[10px] font-bold text-white">
+                        Neked való
+                      </span>
+                    )}
+                  </div>
+                  {wine.description && (
+                    <p className="mt-2 text-xs leading-relaxed text-[var(--muted)]">{wine.description}</p>
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {wine.tags.map((tag) => (
+                      <span key={tag} className="rounded-full bg-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--muted)]">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setStep("welcome")}
+              className="w-full rounded-2xl border border-[var(--border)] bg-white py-4 text-sm font-medium text-[var(--ink)] active:scale-95 transition-transform shadow-sm"
+            >
+              ← Vissza
             </button>
           </div>
         )}
