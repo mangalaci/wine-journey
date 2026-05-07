@@ -15,6 +15,14 @@ import { WINE_REFERENCE } from "@/lib/wineReference";
 
 type Step = "home" | "camera" | "result" | "feedback";
 
+type ScanEntry = {
+  id: string;
+  wineName: string;
+  wineRegion: string;
+  vote: "up" | "down" | null;
+  scannedAt: string;
+};
+
 type WineData = {
   name: string;
   region: string;
@@ -75,6 +83,7 @@ export function WineFlow() {
   const [scanning, setScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   const [mode, setMode] = useState<"for_you" | "explore">("for_you");
+  const [scanHistory, setScanHistory] = useState<ScanEntry[]>([]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -192,21 +201,29 @@ export function WineFlow() {
     if (!session?.user?.id) return;
     (async () => {
       try {
-        const res = await fetch("/api/profile");
-        if (!res.ok) return;
-        const data = await res.json() as {
-          likedWines?: LikedWine[];
-          dislikedWines?: LikedWine[];
-          sessionCount?: number;
-        };
-        if (Array.isArray(data.likedWines) && data.likedWines.length > 0) {
-          setLikedWines(data.likedWines);
-          setDislikedWines(Array.isArray(data.dislikedWines) ? data.dislikedWines : []);
-          const count = data.sessionCount ?? 0;
-          setWinesTriedThisSession(count);
-          prevLevelGateRef.current = count;
-          setPrevLevel(count);
-          setShowWelcomeBack(true);
+        const [profileRes, historyRes] = await Promise.all([
+          fetch("/api/profile"),
+          fetch("/api/history"),
+        ]);
+        if (profileRes.ok) {
+          const data = await profileRes.json() as {
+            likedWines?: LikedWine[];
+            dislikedWines?: LikedWine[];
+            sessionCount?: number;
+          };
+          if (Array.isArray(data.likedWines) && data.likedWines.length > 0) {
+            setLikedWines(data.likedWines);
+            setDislikedWines(Array.isArray(data.dislikedWines) ? data.dislikedWines : []);
+            const count = data.sessionCount ?? 0;
+            setWinesTriedThisSession(count);
+            prevLevelGateRef.current = count;
+            setPrevLevel(count);
+            setShowWelcomeBack(true);
+          }
+        }
+        if (historyRes.ok) {
+          const history = await historyRes.json() as ScanEntry[];
+          setScanHistory(history);
         }
       } catch {
         // Fallback to localStorage if backend unavailable.
@@ -444,18 +461,48 @@ export function WineFlow() {
       ) : null}
 
       {step === "home" && (
-        <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6 py-12">
-          <p className="max-w-[260px] text-center text-sm leading-relaxed text-[var(--muted)]">
-            Point your camera at any bottle — we&apos;ll identify it and learn
-            what you like.
-          </p>
-          <button
-            type="button"
-            onClick={() => setStep("camera")}
-            className="w-full max-w-xs rounded-full bg-[var(--accent)] px-6 py-4 text-base font-semibold text-white shadow-md transition duration-150 hover:opacity-95 active:scale-95"
-          >
-            Scan wine
-          </button>
+        <div className="animate-screen-in flex flex-1 flex-col gap-6">
+          <div className="flex flex-col items-center justify-center gap-6 py-8">
+            <p className="max-w-[260px] text-center text-sm leading-relaxed text-[var(--muted)]">
+              Point your camera at any bottle — we&apos;ll identify it and learn
+              what you like.
+            </p>
+            <button
+              type="button"
+              onClick={() => setStep("camera")}
+              className="w-full max-w-xs rounded-full bg-[var(--accent)] px-6 py-4 text-base font-semibold text-white shadow-md transition duration-150 hover:opacity-95 active:scale-95"
+            >
+              Scan wine
+            </button>
+          </div>
+
+          {scanHistory.length > 0 && (
+            <section className="space-y-3">
+              <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
+                Recent scans
+              </p>
+              <ul className="space-y-2">
+                {scanHistory.slice(0, 5).map((entry) => (
+                  <li
+                    key={entry.id}
+                    className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-white px-4 py-3 shadow-sm"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-[var(--ink)]">
+                        {entry.wineName}
+                      </p>
+                      <p className="truncate text-xs text-[var(--muted)]">
+                        {entry.wineRegion}
+                      </p>
+                    </div>
+                    <span className="ml-3 shrink-0 text-lg">
+                      {entry.vote === "up" ? "👍" : "👎"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       )}
 
@@ -491,6 +538,7 @@ export function WineFlow() {
       {step === "result" && captureUrl && (
         <div className="animate-screen-in flex flex-col gap-6">
           <div className="overflow-hidden rounded-2xl border border-[var(--border)] shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={captureUrl}
               alt="Your capture"
@@ -581,6 +629,20 @@ export function WineFlow() {
                     if (prev.some((w) => w.name === scannedWine.name)) return prev;
                     return [...prev, { name: scannedWine.name, tags: [...tagsToUse] }];
                   });
+                  if (session?.user?.id) {
+                    fetch("/api/history", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        wineName: scannedWine.name,
+                        wineRegion: scannedWine.region,
+                        tags: tagsToUse,
+                        vote: "up",
+                      }),
+                    }).then((r) => r.ok ? r.json() : null).then((entry) => {
+                      if (entry) setScanHistory((prev) => [entry as ScanEntry, ...prev]);
+                    }).catch(() => {});
+                  }
                 }
                 setShowRecs(true);
               }}
@@ -605,6 +667,20 @@ export function WineFlow() {
                     if (prev.some((w) => w.name === scannedWine.name)) return prev;
                     return [...prev, { name: scannedWine.name, tags: [...tagsToUse] }];
                   });
+                  if (session?.user?.id) {
+                    fetch("/api/history", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        wineName: scannedWine.name,
+                        wineRegion: scannedWine.region,
+                        tags: tagsToUse,
+                        vote: "down",
+                      }),
+                    }).then((r) => r.ok ? r.json() : null).then((entry) => {
+                      if (entry) setScanHistory((prev) => [entry as ScanEntry, ...prev]);
+                    }).catch(() => {});
+                  }
                 }
                 setShowRecs(false);
               }}
