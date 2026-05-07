@@ -317,10 +317,10 @@ export function TrailFlow() {
           <button
             type="button"
             onClick={() => setShowProfile(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border)] bg-white text-sm shadow-sm"
-            aria-label="Profil"
+            className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-medium text-[var(--ink)] shadow-sm"
           >
-            🧬
+            <span>🧬</span>
+            <span>Profil</span>
           </button>
           {session ? (
             <button type="button" onClick={() => signOut()} className="text-[10px] text-[var(--muted)]">Ki</button>
@@ -387,10 +387,10 @@ export function TrailFlow() {
         {step === "scan" && (
           <div className="animate-screen-in flex flex-1 flex-col gap-4">
             <p className="text-center text-sm text-[var(--muted)]">Irányítsd a kamerát a palackra</p>
-            <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-black shadow-xl" style={{ maxHeight: "55vh", aspectRatio: "3/4" }}>
+            <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-black shadow-xl" style={{ height: "62vh" }}>
               <video ref={videoRef} playsInline muted className="h-full w-full object-cover" />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="h-48 w-48 rounded-2xl border-2 border-white/60" />
+                <div className="h-40 w-28 rounded-2xl border-2 border-white/60" />
               </div>
             </div>
             <div className="flex gap-3">
@@ -444,81 +444,55 @@ export function TrailFlow() {
           </div>
         )}
 
-        {/* RESULT */}
-        {step === "result" && (
-          <div className="animate-screen-in flex flex-1 flex-col gap-5">
-            {captureUrl && (
-              <div className="overflow-hidden rounded-3xl border border-[var(--border)] shadow-lg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={captureUrl} alt="Scan" className="aspect-[4/3] w-full object-cover" />
-              </div>
-            )}
+        {/* RESULT + REACT (egy képernyő) */}
+        {(step === "result" || step === "react") && (
+          <div className="animate-screen-in flex flex-1 flex-col gap-4">
             {scanError ? (
               <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-4">
                 <p className="text-sm font-medium text-red-700">{scanError}</p>
+                <button type="button" onClick={() => setStep("scan")} className="mt-3 text-sm font-medium text-red-700 underline">Próbáld újra</button>
               </div>
             ) : scannedWine ? (
-              <article className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Azonosítva</p>
-                <h2 className="mt-1 text-xl font-bold text-[var(--ink)]">{scannedWine.name}</h2>
-                <p className="text-sm text-[var(--muted)]">{scannedWine.region}</p>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--ink)]">{scannedWine.description}</p>
-              </article>
-            ) : null}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setStep("scan")}
-                className="flex-1 rounded-2xl border border-[var(--border)] bg-white py-3.5 text-sm font-medium active:scale-95 transition-transform"
-              >
-                Újra
-              </button>
-              {!scanError && scannedWine && (
-                <button
-                  type="button"
-                  onClick={() => setStep("react")}
-                  className="flex-1 rounded-2xl bg-[var(--accent)] py-3.5 text-sm font-bold text-white active:scale-95 transition-transform"
-                >
-                  Értékelem →
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+              <>
+                <article className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Azonosítva</p>
+                  <h2 className="mt-1 text-xl font-bold text-[var(--ink)]">{scannedWine.name}</h2>
+                  <p className="text-sm text-[var(--muted)]">{scannedWine.region}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-[var(--ink)]">{scannedWine.description}</p>
+                </article>
 
-        {/* REACT */}
-        {step === "react" && (
-          <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-10">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-[var(--ink)]">Ízlett?</h2>
-              {scannedWine && (
-                <p className="mt-1 text-sm text-[var(--muted)]">{scannedWine.name}</p>
-              )}
-            </div>
-            <div className="flex gap-8">
-              {(["up", "down"] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  disabled={vote !== null}
-                  onClick={() => handleVote(v)}
-                  className={`flex h-24 w-24 items-center justify-center rounded-full border-2 text-5xl shadow-md transition-all duration-200 active:scale-90 disabled:opacity-40 ${
-                    vote === v
-                      ? "border-[var(--accent)] bg-[var(--accent-soft)] scale-110"
-                      : "border-[var(--border)] bg-white hover:border-[var(--accent)]"
-                  }`}
-                >
-                  {v === "up" ? "👍" : "👎"}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setStep("scan")}
-              className="text-xs text-[var(--muted)] underline underline-offset-2"
-            >
-              Kihagyom ezt az állomást
-            </button>
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <p className="text-lg font-bold text-[var(--ink)]">Ízlett?</p>
+                  <div className="flex gap-6">
+                    {(["up", "down"] as const).map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        disabled={vote !== null}
+                        onClick={() => handleVote(v)}
+                        className={`flex h-20 w-20 items-center justify-center rounded-full border-2 text-4xl shadow-md transition-all duration-200 active:scale-90 disabled:opacity-40 ${
+                          vote === v
+                            ? "border-[var(--accent)] bg-[var(--accent-soft)] scale-110"
+                            : "border-[var(--border)] bg-white"
+                        }`}
+                      >
+                        {v === "up" ? "👍" : "👎"}
+                      </button>
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => setStep("scan")} className="text-xs text-[var(--muted)] underline underline-offset-2">
+                    Újra fotózom
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-1 items-center justify-center">
+                <svg className="h-5 w-5 animate-spin text-[var(--accent)]" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+              </div>
+            )}
           </div>
         )}
 
