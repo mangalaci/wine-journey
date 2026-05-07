@@ -64,9 +64,34 @@ function explorerLevelProgressPercent(level: number): number {
   return Math.min(100, Math.round((level / cap) * 100));
 }
 
+function playCorkPop() {
+  try {
+    const ctx = new AudioContext();
+    const bufferSize = Math.floor(ctx.sampleRate * 0.12);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.025));
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 700;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(1.0, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start();
+  } catch { /* AudioContext not available */ }
+}
+
 export function WineFlow() {
   const { data: session } = useSession();
   const profileStorageKey = "wineProfile";
+  const scanButtonRef = useRef<HTMLButtonElement>(null);
   const [onboardingDone, setOnboardingDone] = useState(true);
   const [step, setStep] = useState<Step>("home");
   const [captureUrl, setCaptureUrl] = useState<string | null>(null);
@@ -456,131 +481,94 @@ export function WineFlow() {
         </div>
       </header>
 
-      {showWelcomeBack ? (
-        <section className="rounded-2xl border border-[var(--border)] bg-white/80 px-4 py-3 text-center shadow-sm">
-          <p className="text-sm font-semibold text-[var(--ink)]">Welcome back 🍷</p>
-          <p className="text-xs text-[var(--muted)]">Your taste profile is evolving</p>
-        </section>
-      ) : null}
-
       {step === "home" && (
-        <div className="animate-screen-in flex flex-1 flex-col gap-6">
-          <div className="flex flex-col items-center justify-center gap-6 py-8">
-            <p className="max-w-[260px] text-center text-sm leading-relaxed text-[var(--muted)]">
-              Point your camera at any bottle — we&apos;ll identify it and learn
-              what you like.
-            </p>
+        <div className="animate-screen-in flex flex-1 flex-col gap-8">
+
+          {/* Liquid hero */}
+          <div className="relative flex flex-col items-center justify-center py-10 overflow-hidden">
+
+            {/* SVG goo filter */}
+            <svg className="absolute w-0 h-0" aria-hidden>
+              <defs>
+                <filter id="goo">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
+                  <feColorMatrix in="blur" mode="matrix"
+                    values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -12"
+                    result="goo"
+                  />
+                </filter>
+              </defs>
+            </svg>
+
+            {/* Floating background blobs */}
+            <div className="absolute inset-0 pointer-events-none" style={{ filter: "url(#goo)" }}>
+              <div className="animate-blob-morph animate-float-1 absolute w-36 h-36 bg-[var(--accent)] opacity-20"
+                style={{ top: "0%", left: "5%" }} />
+              <div className="animate-blob-morph animate-float-2 absolute w-28 h-28 bg-[var(--accent)] opacity-15"
+                style={{ top: "15%", right: "8%", animationDelay: "-4s" }} />
+              <div className="animate-blob-morph animate-float-3 absolute w-20 h-20 bg-[var(--accent)] opacity-10"
+                style={{ bottom: "5%", left: "25%", animationDelay: "-2s" }} />
+            </div>
+
+            {/* Main scan button */}
             <button
+              ref={scanButtonRef}
               type="button"
-              onClick={() => setStep("camera")}
-              className="w-full max-w-xs rounded-full bg-[var(--accent)] px-6 py-4 text-base font-semibold text-white shadow-md transition duration-150 hover:opacity-95 active:scale-95"
+              onClick={(e) => {
+                playCorkPop();
+                const btn = scanButtonRef.current;
+                if (btn) {
+                  const rect = btn.getBoundingClientRect();
+                  const ripple = document.createElement("span");
+                  ripple.className = "animate-ripple";
+                  ripple.style.cssText = `position:absolute;left:${e.clientX - rect.left}px;top:${e.clientY - rect.top}px;width:24px;height:24px;background:rgba(255,255,255,0.5);border-radius:50%;pointer-events:none;`;
+                  btn.appendChild(ripple);
+                  ripple.addEventListener("animationend", () => ripple.remove());
+                }
+                setStep("camera");
+              }}
+              className="animate-blob-morph animate-blob-pulse relative z-10 overflow-hidden flex flex-col items-center justify-center w-52 h-52 bg-[var(--accent)] text-white shadow-2xl transition-transform duration-150 active:scale-90 cursor-pointer"
+              style={{ willChange: "border-radius, transform" }}
             >
-              Scan wine
+              <span className="text-5xl mb-2 select-none">🍷</span>
+              <span className="text-lg font-bold tracking-wide select-none">Scan wine</span>
             </button>
+
+            <p className="relative z-10 mt-5 text-xs text-[var(--muted)] text-center">
+              Fényképezz le bármilyen palackot
+            </p>
           </div>
 
-          <section className="space-y-3">
-            <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
-              Find by mood
-            </p>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!moodQuery.trim()) return;
-                setMoodLoading(true);
-                setMoodResults([]);
-                try {
-                  const res = await fetch("/api/mood-search", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ query: moodQuery }),
-                  });
-                  if (res.ok) {
-                    const data = await res.json() as { name: string; reason: string; tags: string[] }[];
-                    setMoodResults(data);
-                  }
-                } catch {
-                  // silently fail
-                } finally {
-                  setMoodLoading(false);
-                }
-              }}
-              className="flex gap-2"
-            >
-              <input
-                type="text"
-                value={moodQuery}
-                onChange={(e) => setMoodQuery(e.target.value)}
-                placeholder="pl. romantikus vacsora, nyári buli..."
-                className="flex-1 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-              />
-              <button
-                type="submit"
-                disabled={moodLoading}
-                className="rounded-xl bg-[var(--accent)] px-4 py-3 text-sm font-semibold text-white transition disabled:opacity-50"
-              >
-                {moodLoading ? "…" : "→"}
-              </button>
-            </form>
-
-            {moodResults.length > 0 && (
-              <ul className="space-y-2">
-                {moodResults.map((wine) => (
-                  <li
-                    key={wine.name}
-                    className="rounded-xl border border-[var(--border)] bg-white px-4 py-3 shadow-sm"
-                  >
-                    <p className="text-sm font-semibold text-[var(--ink)]">{wine.name}</p>
-                    <p className="mt-0.5 text-xs text-[var(--muted)]">{wine.reason}</p>
-                    {wine.tags.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {wine.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full bg-[var(--border)] px-2 py-0.5 text-xs text-[var(--muted)]"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
+          {/* Secondary sections */}
+          <div className="flex flex-col gap-6">
+            {likedWines.length >= 2 && (
+              <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
             )}
-          </section>
 
-          {likedWines.length >= 2 && (
-            <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
-          )}
-
-          {scanHistory.length > 0 && (
-            <section className="space-y-3">
-              <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
-                Recent scans
-              </p>
-              <ul className="space-y-2">
-                {scanHistory.slice(0, 5).map((entry) => (
-                  <li
-                    key={entry.id}
-                    className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-white px-4 py-3 shadow-sm"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-[var(--ink)]">
-                        {entry.wineName}
-                      </p>
-                      <p className="truncate text-xs text-[var(--muted)]">
-                        {entry.wineRegion}
-                      </p>
-                    </div>
-                    <span className="ml-3 shrink-0 text-lg">
-                      {entry.vote === "up" ? "👍" : "👎"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+            {scanHistory.length > 0 && (
+              <section className="space-y-3">
+                <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
+                  Legutóbbi scanek
+                </p>
+                <ul className="space-y-2">
+                  {scanHistory.slice(0, 5).map((entry) => (
+                    <li
+                      key={entry.id}
+                      className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-white px-4 py-3 shadow-sm"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-[var(--ink)]">{entry.wineName}</p>
+                        <p className="truncate text-xs text-[var(--muted)]">{entry.wineRegion}</p>
+                      </div>
+                      <span className="ml-3 shrink-0 text-lg">
+                        {entry.vote === "up" ? "👍" : "👎"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
         </div>
       )}
 
