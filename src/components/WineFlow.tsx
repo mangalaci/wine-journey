@@ -617,7 +617,6 @@ export function WineFlow() {
               className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--border)] bg-white text-3xl shadow-sm transition duration-150 enabled:hover:border-[var(--accent)] enabled:active:scale-95 disabled:opacity-40"
               onClick={() => {
                 if (vote) return;
-                console.log("DEBUG session:", session?.user?.id);
                 setVote("up");
                 setWinesTriedThisSession((n) => n + 1);
                 if (scannedWine) {
