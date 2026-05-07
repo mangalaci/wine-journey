@@ -18,6 +18,7 @@ type TrailStep =
   | "result"
   | "react"
   | "milestone"
+  | "palate_reveal"
   | "suggestion"
   | "show_suggestion";
 
@@ -284,11 +285,11 @@ export function TrailFlow() {
       setCurrentMilestone(milestone);
       setTimeout(() => {
         setCurrentMilestone(null);
-        setStep("suggestion");
+        setStep("palate_reveal");
       }, 2200);
       setStep("milestone");
     } else {
-      setStep("suggestion");
+      setStep("palate_reveal");
     }
   };
 
@@ -513,6 +514,38 @@ export function TrailFlow() {
           </div>
         )}
 
+        {/* PALATE REVEAL */}
+        {step === "palate_reveal" && (
+          <div className="animate-screen-in flex flex-1 flex-col gap-6 pt-2">
+            <div className="text-center">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
+                {winesTriedTotal === 1 ? "Első adatpont" : "Így változott az ízlésed"}
+              </p>
+              <h2 className="mt-2 text-xl font-bold text-[var(--ink)]">
+                {winesTriedTotal < 3
+                  ? "Még alakul a képed..."
+                  : "A te bor-DNS-ed"}
+              </h2>
+            </div>
+
+            <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
+
+            {winesTriedTotal < 3 && (
+              <p className="text-center text-xs text-[var(--muted)]">
+                Még {3 - winesTriedTotal} bor és látni fogod az ízlésed mintázatát
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setStep("suggestion")}
+              className="mt-auto w-full rounded-2xl bg-[var(--accent)] py-4 text-base font-bold text-white active:scale-95 transition-transform shadow-md"
+            >
+              Tovább →
+            </button>
+          </div>
+        )}
+
         {/* SUGGESTION */}
         {step === "suggestion" && (
           <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6">
@@ -581,7 +614,7 @@ export function TrailFlow() {
       {showProfile && (
         <div className="fixed inset-0 z-50 flex flex-col bg-[var(--bg)]">
           <div className="flex items-center justify-between px-5 pt-10 pb-4">
-            <h2 className="text-lg font-bold text-[var(--ink)]">A te profilod</h2>
+            <h2 className="text-lg font-bold text-[var(--ink)]">Megjárt állomások</h2>
             <button
               type="button"
               onClick={() => setShowProfile(false)}
