@@ -59,6 +59,8 @@ export const WINERY_DATABASE: Record<string, WineryEntry> = {
   "sebestyén":           { region: "Szekszárd", country: "Hungary" },
   "sebestyen":           { region: "Szekszárd", country: "Hungary" },
   "takler":              { region: "Szekszárd", country: "Hungary" },
+  "planta familia":      { region: "Szekszárd", country: "Hungary" },
+  "planta":              { region: "Szekszárd", country: "Hungary" },
 
   // Somló
   "kolonics":            { region: "Somló", country: "Hungary" },
