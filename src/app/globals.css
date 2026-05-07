@@ -70,3 +70,15 @@ body {
 .animate-float-2    { animation: blob-float-2 12s ease-in-out infinite; will-change: transform; }
 .animate-float-3    { animation: blob-float-3  7s ease-in-out infinite; will-change: transform; }
 .animate-ripple     { animation: ripple-out 0.7s ease-out forwards; }
+
+@keyframes wave-flow {
+  from { transform: translateX(0px); }
+  to   { transform: translateX(-40px); }
+}
+
+@keyframes bg-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+.animate-wave { animation: wave-flow 3s linear infinite; will-change: transform; }

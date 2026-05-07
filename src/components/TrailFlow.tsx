@@ -98,6 +98,69 @@ function getSuggestion(likedWines: LikedWine[], dislikedWines: LikedWine[], excl
     .sort((a, b) => b.score - a.score)[0] ?? pool[0]!;
 }
 
+// ─── Wine glass hero ──────────────────────────────────────────────────────────
+
+function WineGlassHero({ onTap, label }: { onTap: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onTap}
+      className="flex flex-col items-center gap-4 active:scale-95 transition-transform duration-150"
+      aria-label={label}
+    >
+      <svg viewBox="0 0 100 155" className="w-48 drop-shadow-2xl" aria-hidden>
+        <defs>
+          <clipPath id="wg-bowl">
+            <path d="M 15,5 C 2,45 2,88 42,104 L 58,104 C 98,88 98,45 85,5 Z" />
+          </clipPath>
+          <linearGradient id="wg-wine" x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0%" stopColor="#a33040" />
+            <stop offset="100%" stopColor="#5a1a28" />
+          </linearGradient>
+        </defs>
+
+        {/* Glass body */}
+        <path
+          d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5 Z"
+          fill="rgba(255,255,255,0.10)"
+        />
+
+        {/* Wine liquid */}
+        <g clipPath="url(#wg-bowl)">
+          <rect x="-5" y="75" width="110" height="33" fill="url(#wg-wine)" opacity="0.80" />
+          <path
+            className="animate-wave"
+            d="M -40,72 Q -20,63 0,72 Q 20,81 40,72 Q 60,63 80,72 Q 100,81 120,72 Q 140,63 160,72 L 160,78 L -40,78 Z"
+            fill="url(#wg-wine)"
+            opacity="0.88"
+          />
+        </g>
+
+        {/* Glass outline (drawn on top so glass appears in front of wine) */}
+        <path
+          d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5"
+          fill="none"
+          stroke="#722f37"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+
+        {/* Shine highlight */}
+        <path
+          d="M 22,18 C 14,48 14,78 37,97"
+          fill="none"
+          stroke="rgba(255,255,255,0.5)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+      </svg>
+
+      <span className="text-base font-bold text-[var(--ink)]">{label}</span>
+    </button>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function TrailFlow() {
@@ -339,51 +402,51 @@ export function TrailFlow() {
 
         {/* WELCOME */}
         {step === "welcome" && (
-          <div className="animate-screen-in flex flex-1 flex-col">
-            <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
-              <svg className="absolute w-0 h-0" aria-hidden>
-                <defs>
-                  <filter id="goo">
-                    <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
-                    <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -12" />
-                  </filter>
-                </defs>
-              </svg>
-              <div className="absolute inset-0 pointer-events-none" style={{ filter: "url(#goo)" }}>
-                <div className="animate-blob-morph animate-float-1 absolute w-40 h-40 bg-[var(--accent)] opacity-20" style={{ top: "5%", left: "0%" }} />
-                <div className="animate-blob-morph animate-float-2 absolute w-32 h-32 bg-[var(--accent)] opacity-15" style={{ top: "20%", right: "5%", animationDelay: "-4s" }} />
-                <div className="animate-blob-morph animate-float-3 absolute w-24 h-24 bg-[var(--accent)] opacity-10" style={{ bottom: "15%", left: "20%", animationDelay: "-2s" }} />
-              </div>
-
-              <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-                {isFirstVisit ? (
-                  <>
-                    <p className="text-4xl">🍷</p>
-                    <h1 className="text-2xl font-bold text-[var(--ink)]">Üdv a Bortúrán!</h1>
-                    <p className="max-w-[240px] text-sm text-[var(--muted)] leading-relaxed">
-                      Fotózz le egy bort — mi azonosítjuk, te értékeled, az app tanul.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-4xl">👋</p>
-                    <h1 className="text-2xl font-bold text-[var(--ink)]">Üdv vissza!</h1>
-                    {winesTriedTotal > 0 && (
-                      <p className="text-sm text-[var(--muted)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
-                    )}
-                  </>
-                )}
-                <button
-                  type="button"
-                  onClick={startTrail}
-                  className="animate-blob-morph animate-blob-pulse mt-4 flex h-44 w-44 flex-col items-center justify-center bg-[var(--accent)] text-white shadow-2xl active:scale-90 transition-transform duration-150"
-                  style={{ willChange: "border-radius, transform" }}
-                >
-                  <span className="text-4xl mb-1">📷</span>
-                  <span className="text-base font-bold">{isFirstVisit ? "Kezdjük!" : "Folytatom"}</span>
-                </button>
-              </div>
+          <div
+            className="flex flex-1 flex-col items-center justify-between py-8"
+            style={{
+              background: "linear-gradient(135deg, #faf9f7 0%, #f4e8ea 40%, #e8d5d8 60%, #faf9f7 100%)",
+              backgroundSize: "300% 300%",
+              animation: "screen-in 220ms ease-out, bg-drift 8s ease-in-out infinite",
+            }}
+          >
+            <div className="text-center pt-2">
+              {isFirstVisit ? (
+                <>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">Bortúra</p>
+                  <h1 className="mt-2 text-2xl font-bold text-[var(--ink)]">Fedezd fel az ízlésedet</h1>
+                  <p className="mt-2 text-sm text-[var(--muted)] max-w-[240px] mx-auto leading-relaxed">
+                    Fotózz le egy bort — mi azonosítjuk, te értékeled, az app tanul.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-2xl font-bold text-[var(--ink)]">Üdv vissza!</h1>
+                  {winesTriedTotal > 0 && (
+                    <p className="mt-1 text-sm text-[var(--muted)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
+                  )}
+                </>
+              )}
             </div>
+
+            <WineGlassHero onTap={startTrail} label={isFirstVisit ? "Kezdjük!" : "Folytatom"} />
+
+            {scanHistory.length > 0 ? (
+              <div className="w-full space-y-2">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Legutóbb</p>
+                {scanHistory.slice(0, 2).map((entry) => (
+                  <div key={entry.id} className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-white/70 px-3 py-2 shadow-sm">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-[var(--ink)]">{entry.wineName}</p>
+                      <p className="truncate text-xs text-[var(--muted)]">{entry.wineRegion}</p>
+                    </div>
+                    <span className="ml-2 text-base">{entry.vote === "up" ? "👍" : "👎"}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-16" />
+            )}
           </div>
         )}
 
@@ -517,23 +580,35 @@ export function TrailFlow() {
         {/* PALATE REVEAL */}
         {step === "palate_reveal" && (
           <div className="animate-screen-in flex flex-1 flex-col gap-6 pt-2">
-            <div className="text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
-                {winesTriedTotal === 1 ? "Első adatpont" : "Így változott az ízlésed"}
-              </p>
-              <h2 className="mt-2 text-xl font-bold text-[var(--ink)]">
-                {winesTriedTotal < 3
-                  ? "Még alakul a képed..."
-                  : "A te bor-DNS-ed"}
-              </h2>
-            </div>
-
-            <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
-
-            {winesTriedTotal < 3 && (
-              <p className="text-center text-xs text-[var(--muted)]">
-                Még {3 - winesTriedTotal} bor és látni fogod az ízlésed mintázatát
-              </p>
+            {winesTriedTotal < 3 ? (
+              <>
+                <div className="text-center">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">Ízlésprofil</p>
+                  <h2 className="mt-2 text-xl font-bold text-[var(--ink)]">Még alakul a képed...</h2>
+                </div>
+                <div className="rounded-2xl border border-[var(--border)] bg-white px-5 py-6 shadow-sm space-y-4">
+                  <p className="text-sm text-[var(--muted)] text-center">
+                    Még <span className="font-bold text-[var(--ink)]">{3 - winesTriedTotal}</span> bor és látod az ízlésed mintázatát
+                  </p>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]">
+                    <div
+                      className="h-full rounded-full bg-[var(--accent)] transition-all duration-500"
+                      style={{ width: `${(winesTriedTotal / 3) * 100}%` }}
+                    />
+                  </div>
+                  <p className="text-center text-xs text-[var(--muted)]">{winesTriedTotal} / 3</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-center">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
+                    {winesTriedTotal === 3 ? "Elkészült az első képed!" : "Így változott az ízlésed"}
+                  </p>
+                  <h2 className="mt-2 text-xl font-bold text-[var(--ink)]">A te bor-DNS-ed</h2>
+                </div>
+                <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
+              </>
             )}
 
             <button
