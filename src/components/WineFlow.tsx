@@ -550,6 +550,10 @@ export function WineFlow() {
             )}
           </section>
 
+          {likedWines.length >= 2 && (
+            <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
+          )}
+
           {scanHistory.length > 0 && (
             <section className="space-y-3">
               <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
@@ -813,7 +817,7 @@ export function WineFlow() {
                   />
                 </div>
               </div>
-              <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
+              <TasteProfileCard profile={tasteProfile} radar={tasteRadar} compact />
               <ProgressIndicator likedCount={likedCount} />
               <p className="text-sm font-medium text-[var(--ink)]">
                 Because you liked this style
