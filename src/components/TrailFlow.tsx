@@ -18,7 +18,8 @@ type TrailStep =
   | "result"
   | "react"
   | "milestone"
-  | "suggestion";
+  | "suggestion"
+  | "show_suggestion";
 
 type WineData = {
   name: string;
@@ -280,14 +281,10 @@ export function TrailFlow() {
       setCurrentMilestone(milestone);
       setTimeout(() => {
         setCurrentMilestone(null);
-        const s = getSuggestion(likedWines, dislikedWines, scannedWine?.name ?? null);
-        setSuggestion(s);
         setStep("suggestion");
       }, 2200);
       setStep("milestone");
     } else {
-      const s = getSuggestion(likedWines, dislikedWines, scannedWine?.name ?? null);
-      setSuggestion(s);
       setStep("suggestion");
     }
   };
@@ -390,8 +387,11 @@ export function TrailFlow() {
         {step === "scan" && (
           <div className="animate-screen-in flex flex-1 flex-col gap-4">
             <p className="text-center text-sm text-[var(--muted)]">Irányítsd a kamerát a palackra</p>
-            <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-black shadow-xl aspect-[3/4]">
+            <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-black shadow-xl" style={{ maxHeight: "55vh", aspectRatio: "3/4" }}>
               <video ref={videoRef} playsInline muted className="h-full w-full object-cover" />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="h-48 w-48 rounded-2xl border-2 border-white/60" />
+              </div>
             </div>
             <div className="flex gap-3">
               <button
@@ -479,7 +479,7 @@ export function TrailFlow() {
                   onClick={() => setStep("react")}
                   className="flex-1 rounded-2xl bg-[var(--accent)] py-3.5 text-sm font-bold text-white active:scale-95 transition-transform"
                 >
-                  Ízlett? →
+                  Értékelem →
                 </button>
               )}
             </div>
@@ -537,27 +537,50 @@ export function TrailFlow() {
 
         {/* SUGGESTION */}
         {step === "suggestion" && (
-          <div className="animate-screen-in flex flex-1 flex-col gap-6 pt-4">
+          <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6">
             <div className="text-center">
-              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
-                {vote === "up" ? "Mert szeretted ezt a stílust" : "Valami más irány"}
-              </p>
-              <h2 className="mt-2 text-xl font-bold text-[var(--ink)]">Ezt próbáld következőnek</h2>
+              <h2 className="text-2xl font-bold text-[var(--ink)]">Kérsz javaslatot?</h2>
+              <p className="mt-2 text-sm text-[var(--muted)]">A következő borra</p>
             </div>
 
-            {suggestion && (
-              <article className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
-                <h3 className="text-lg font-bold text-[var(--ink)]">{suggestion.name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{suggestion.description}</p>
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {suggestion.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--accent)]">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </article>
-            )}
+            <div className="flex flex-col gap-3 w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  const s = getSuggestion(likedWines, dislikedWines, scannedWine?.name ?? null);
+                  setSuggestion(s);
+                  setStep("show_suggestion" as TrailStep);
+                }}
+                className="w-full rounded-2xl bg-[var(--accent)] py-4 text-base font-bold text-white active:scale-95 transition-transform shadow-md"
+              >
+                Igen, mutasd! 🍷
+              </button>
+              <button
+                type="button"
+                onClick={continueTrail}
+                className="w-full rounded-2xl border border-[var(--border)] bg-white py-4 text-base font-medium text-[var(--ink)] active:scale-95 transition-transform"
+              >
+                Inkább scannelек →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* SHOW SUGGESTION */}
+        {(step as string) === "show_suggestion" && suggestion && (
+          <div className="animate-screen-in flex flex-1 flex-col gap-5 pt-4">
+            <article className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Próbáld ezt</p>
+              <h3 className="mt-1 text-xl font-bold text-[var(--ink)]">{suggestion.name}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{suggestion.description}</p>
+              <div className="mt-3 flex flex-wrap gap-1">
+                {suggestion.tags.map((tag) => (
+                  <span key={tag} className="rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--accent)]">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </article>
 
             {likedWines.length >= 3 && (
               <TasteProfileCard profile={tasteProfile} radar={tasteRadar} compact />
@@ -566,7 +589,7 @@ export function TrailFlow() {
             <button
               type="button"
               onClick={continueTrail}
-              className="animate-blob-morph animate-blob-pulse mt-auto flex h-36 w-full flex-col items-center justify-center rounded-3xl bg-[var(--accent)] text-white shadow-xl active:scale-95 transition-transform"
+              className="animate-blob-morph animate-blob-pulse mt-auto flex h-32 w-full flex-col items-center justify-center rounded-3xl bg-[var(--accent)] text-white shadow-xl active:scale-95 transition-transform"
               style={{ willChange: "border-radius" }}
             >
               <span className="text-3xl mb-1">📷</span>
