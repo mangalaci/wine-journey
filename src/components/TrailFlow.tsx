@@ -111,7 +111,7 @@ function getSuggestion(likedWines: LikedWine[], dislikedWines: LikedWine[], excl
 
 // ─── Wine glass hero ──────────────────────────────────────────────────────────
 
-function WineGlassHero({ onTap, label }: { onTap: () => void; label: string }) {
+function WineGlassHero({ onTap, label, dark }: { onTap: () => void; label: string; dark?: boolean }) {
   return (
     <button
       type="button"
@@ -119,13 +119,18 @@ function WineGlassHero({ onTap, label }: { onTap: () => void; label: string }) {
       className="flex flex-col items-center gap-4 active:scale-95 transition-transform duration-150"
       aria-label={label}
     >
-      <svg viewBox="0 0 100 155" className="w-48 drop-shadow-2xl" aria-hidden>
+      <svg
+        viewBox="0 0 100 155"
+        className="w-52"
+        style={{ filter: dark ? "drop-shadow(0 0 32px rgba(180,40,60,0.55))" : "drop-shadow(0 6px 24px rgba(140,28,46,0.22))" }}
+        aria-hidden
+      >
         <defs>
           <clipPath id="wg-bowl">
             <path d="M 15,5 C 2,45 2,88 42,104 L 58,104 C 98,88 98,45 85,5 Z" />
           </clipPath>
           <linearGradient id="wg-wine" x1="0" y1="0" x2="0.4" y2="1">
-            <stop offset="0%" stopColor="#a33040" />
+            <stop offset="0%" stopColor="#c4435a" />
             <stop offset="100%" stopColor="#5a1a28" />
           </linearGradient>
         </defs>
@@ -133,25 +138,25 @@ function WineGlassHero({ onTap, label }: { onTap: () => void; label: string }) {
         {/* Glass body */}
         <path
           d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5 Z"
-          fill="rgba(255,255,255,0.10)"
+          fill={dark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.10)"}
         />
 
         {/* Wine liquid */}
         <g clipPath="url(#wg-bowl)">
-          <rect x="-5" y="75" width="110" height="33" fill="url(#wg-wine)" opacity="0.80" />
+          <rect x="-5" y="75" width="110" height="33" fill="url(#wg-wine)" opacity="0.85" />
           <path
             className="animate-wave"
             d="M -40,72 Q -20,63 0,72 Q 20,81 40,72 Q 60,63 80,72 Q 100,81 120,72 Q 140,63 160,72 L 160,78 L -40,78 Z"
             fill="url(#wg-wine)"
-            opacity="0.88"
+            opacity="0.92"
           />
         </g>
 
-        {/* Glass outline (drawn on top so glass appears in front of wine) */}
+        {/* Glass outline */}
         <path
           d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5"
           fill="none"
-          stroke="#722f37"
+          stroke={dark ? "rgba(255,255,255,0.65)" : "#8c1c2c"}
           strokeWidth="2.5"
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -161,13 +166,15 @@ function WineGlassHero({ onTap, label }: { onTap: () => void; label: string }) {
         <path
           d="M 22,18 C 14,48 14,78 37,97"
           fill="none"
-          stroke="rgba(255,255,255,0.5)"
+          stroke={dark ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.55)"}
           strokeWidth="2.5"
           strokeLinecap="round"
         />
       </svg>
 
-      <span className="text-base font-bold text-[var(--ink)]">{label}</span>
+      <span className={`text-sm font-semibold uppercase tracking-widest ${dark ? "text-[rgba(255,255,255,0.75)]" : "text-[var(--ink)]"}`}>
+        {label}
+      </span>
     </button>
   );
 }
@@ -422,13 +429,15 @@ export function TrailFlow() {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
+  const isDark = step === "welcome";
+
   return (
-    <div className="relative flex min-h-dvh flex-col">
+    <div className={`relative flex min-h-dvh flex-col transition-colors duration-500 ${isDark ? "bg-[#0a0306]" : "bg-[var(--bg)]"}`}>
 
       {/* ── Top bar ── */}
       <header className="flex items-center justify-between px-5 pt-10 pb-4">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">
+          <p className={`text-[10px] font-semibold uppercase tracking-widest ${isDark ? "text-[rgba(255,255,255,0.3)]" : "text-[var(--muted)]"}`}>
             {winesTriedTotal > 0 ? `${winesTriedTotal}. állomás` : "Bortúra"}
           </p>
         </div>
@@ -436,15 +445,19 @@ export function TrailFlow() {
           <button
             type="button"
             onClick={() => setShowProfile(true)}
-            className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-medium text-[var(--ink)] shadow-sm"
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm ${
+              isDark
+                ? "border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.07)] text-[rgba(255,255,255,0.8)]"
+                : "border-[var(--border)] bg-white text-[var(--ink)]"
+            }`}
           >
             <span>🧬</span>
             <span>Profil</span>
           </button>
           {session ? (
-            <button type="button" onClick={() => signOut()} className="text-[10px] text-[var(--muted)]">Ki</button>
+            <button type="button" onClick={() => signOut()} className={`text-[10px] ${isDark ? "text-[rgba(255,255,255,0.3)]" : "text-[var(--muted)]"}`}>Ki</button>
           ) : (
-            <Link href="/auth/login" className="text-[10px] font-medium text-[var(--accent)]">Be</Link>
+            <Link href="/auth/login" className={`text-[10px] font-medium ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-[var(--accent)]"}`}>Be</Link>
           )}
         </div>
       </header>
@@ -454,54 +467,64 @@ export function TrailFlow() {
 
         {/* WELCOME */}
         {step === "welcome" && (
-          <div
-            className="flex flex-1 flex-col items-center justify-between py-8"
-            style={{
-              background: "linear-gradient(135deg, #faf9f7 0%, #f4e8ea 40%, #e8d5d8 60%, #faf9f7 100%)",
-              backgroundSize: "300% 300%",
-              animation: "screen-in 220ms ease-out, bg-drift 8s ease-in-out infinite",
-            }}
-          >
-            <div className="text-center pt-2">
+          <div className="flex flex-1 flex-col items-center justify-between py-8" style={{ animation: "screen-in 300ms ease-out" }}>
+            {/* Radial wine glow */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{ background: "radial-gradient(ellipse at 50% 110%, rgba(140,28,46,0.38) 0%, transparent 62%)" }}
+            />
+
+            {/* Heading */}
+            <div className="relative z-10 text-center">
               {isFirstVisit ? (
                 <>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">Bortúra</p>
-                  <h1 className="mt-2 text-2xl font-bold text-[var(--ink)]">Fedezd fel az ízlésedet</h1>
-                  <p className="mt-2 text-sm text-[var(--muted)] max-w-[240px] mx-auto leading-relaxed">
-                    Fotózz le egy bort — mi azonosítjuk, te értékeled, az app tanul.
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[rgba(255,255,255,0.35)]">Bortúra</p>
+                  <h1
+                    className="mt-3 text-[2.6rem] leading-[1.15] font-bold text-white"
+                    style={{ fontFamily: "var(--font-playfair)" }}
+                  >
+                    Fedezd fel<br />
+                    <em>az ízlésedet</em>
+                  </h1>
+                  <p className="mt-3 text-sm text-[rgba(255,255,255,0.42)] max-w-[210px] mx-auto leading-relaxed">
+                    Fotózz le egy bort — az app megtanulja, mi illik hozzád.
                   </p>
                 </>
               ) : (
                 <>
-                  <h1 className="text-2xl font-bold text-[var(--ink)]">Üdv vissza!</h1>
+                  <h1
+                    className="text-[2.2rem] font-bold text-white"
+                    style={{ fontFamily: "var(--font-playfair)" }}
+                  >
+                    Üdv vissza!
+                  </h1>
                   {winesTriedTotal > 0 && (
-                    <p className="mt-1 text-sm text-[var(--muted)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
+                    <p className="mt-2 text-sm text-[rgba(255,255,255,0.42)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
                   )}
                 </>
               )}
             </div>
 
-            <WineGlassHero onTap={startTrail} label={isFirstVisit ? "Kezdjük!" : "Folytatom"} />
+            {/* Wine glass */}
+            <div className="relative z-10">
+              <WineGlassHero onTap={startTrail} label={isFirstVisit ? "Kezdjük!" : "Folytatom"} dark />
+            </div>
 
-            <div className="w-full space-y-3">
-              {scanHistory.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Legutóbb</p>
-                  {scanHistory.slice(0, 2).map((entry) => (
-                    <div key={entry.id} className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-white/70 px-3 py-2 shadow-sm">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-[var(--ink)]">{entry.wineName}</p>
-                        <p className="truncate text-xs text-[var(--muted)]">{entry.wineRegion}</p>
-                      </div>
-                      <span className="ml-2 text-base">{entry.vote === "up" ? "👍" : "👎"}</span>
-                    </div>
-                  ))}
+            {/* Bottom actions */}
+            <div className="relative z-10 w-full space-y-2">
+              {scanHistory.slice(0, 1).map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[rgba(255,255,255,0.75)]">{entry.wineName}</p>
+                    <p className="truncate text-xs text-[rgba(255,255,255,0.35)]">{entry.wineRegion}</p>
+                  </div>
+                  <span className="ml-2 text-base">{entry.vote === "up" ? "👍" : "👎"}</span>
                 </div>
-              )}
+              ))}
               <button
                 type="button"
                 onClick={() => setStep("itallap")}
-                className="w-full rounded-xl border border-[var(--border)] bg-white/70 py-3 text-sm font-medium text-[var(--accent)] shadow-sm active:scale-95 transition-transform"
+                className="w-full rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] py-3 text-sm font-medium text-[rgba(255,255,255,0.55)] active:scale-95 transition-transform"
               >
                 📋 Étteremben vagy? Borlap fotózása
               </button>
@@ -573,7 +596,7 @@ export function TrailFlow() {
 
         {/* RESULT + REACT (egy képernyő) */}
         {(step === "result" || step === "react") && (
-          <div className="animate-screen-in flex flex-1 flex-col gap-4">
+          <div className="animate-screen-in flex flex-1 flex-col gap-5">
             {scanError ? (
               <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-4">
                 <p className="text-sm font-medium text-red-700">{scanError}</p>
@@ -581,29 +604,52 @@ export function TrailFlow() {
               </div>
             ) : scannedWine ? (
               <>
-                <article className="rounded-2xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">Azonosítva</p>
-                  <h2 className="mt-1 text-xl font-bold text-[var(--ink)]">{scannedWine.name}</h2>
-                  <p className="text-sm text-[var(--muted)]">{scannedWine.region}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-[var(--ink)]">{scannedWine.description}</p>
+                {/* Premium wine card */}
+                <article className="overflow-hidden rounded-3xl" style={{ boxShadow: "0 8px 40px rgba(140,28,46,0.18)" }}>
+                  <div className="bg-gradient-to-br from-[#8c1c2c] to-[#2e0810] px-5 py-5">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[rgba(255,255,255,0.4)]">Azonosítva</p>
+                    <h2
+                      className="mt-1.5 text-2xl font-bold text-white leading-tight"
+                      style={{ fontFamily: "var(--font-playfair)" }}
+                    >
+                      {scannedWine.name}
+                    </h2>
+                    <p className="mt-0.5 text-sm text-[rgba(255,255,255,0.5)]">{scannedWine.region}</p>
+                  </div>
+                  <div className="bg-white px-5 py-4">
+                    <p className="text-sm leading-relaxed text-[var(--ink)]">{scannedWine.description}</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {scannedWine.tags.map((tag) => (
+                        <span key={tag} className="rounded-full bg-[var(--accent-soft)] px-3 py-0.5 text-xs font-semibold text-[var(--accent)]">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </article>
 
-                <div className="flex flex-col items-center gap-4 py-4">
-                  <p className="text-lg font-bold text-[var(--ink)]">Ízlett?</p>
-                  <div className="flex gap-6">
+                {/* Vote */}
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Ízlett?</p>
+                  <div className="flex w-full gap-3">
                     {(["up", "down"] as const).map((v) => (
                       <button
                         key={v}
                         type="button"
                         disabled={vote !== null}
                         onClick={() => handleVote(v)}
-                        className={`flex h-20 w-20 items-center justify-center rounded-full border-2 text-4xl shadow-md transition-all duration-200 active:scale-90 disabled:opacity-40 ${
+                        className={`flex flex-1 flex-col items-center gap-2 rounded-2xl border-2 py-5 transition-all duration-200 active:scale-95 disabled:opacity-50 ${
                           vote === v
-                            ? "border-[var(--accent)] bg-[var(--accent-soft)] scale-110"
-                            : "border-[var(--border)] bg-white"
+                            ? v === "up"
+                              ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                              : "border-[var(--muted)] bg-[var(--muted)] text-white"
+                            : "border-[var(--border)] bg-white text-[var(--ink)]"
                         }`}
                       >
-                        {v === "up" ? "👍" : "👎"}
+                        <span className="text-3xl">{v === "up" ? "👍" : "👎"}</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wide">
+                          {v === "up" ? "Ízlett" : "Nem jött be"}
+                        </span>
                       </button>
                     ))}
                   </div>
