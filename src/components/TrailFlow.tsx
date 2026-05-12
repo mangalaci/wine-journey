@@ -509,13 +509,13 @@ export function TrailFlow() {
             {/* 3D wine bottle — Spline iframe embed */}
             <div className="relative z-10 flex flex-col items-center gap-4">
               <div
-                className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 overflow-hidden rounded-2xl"
-                style={{ width: "260px", height: "340px" }}
+                className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150"
+                style={{ width: "min(100vw, 420px)", height: "420px" }}
                 onClick={startTrail}
               >
                 <iframe
                   src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
-                  style={{ width: "100%", height: "100%", border: "none" }}
+                  style={{ width: "100%", height: "100%", border: "none", background: "transparent" }}
                   title="3D wine bottle"
                   loading="lazy"
                 />
