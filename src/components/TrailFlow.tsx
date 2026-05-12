@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { useSession, signOut } from "next-auth/react";
+
+const Spline = dynamic(() => import("@splinetool/react-spline"), { ssr: false });
 import Link from "next/link";
 import { TasteProfileCard } from "@/components/TasteProfileCard";
 import { matchWine, type SemanticWineMatch } from "@/lib/semanticWineMatch";
@@ -212,10 +215,21 @@ export function TrailFlow() {
   const streamRef = useRef<MediaStream | null>(null);
   const scanButtonRef = useRef<HTMLButtonElement>(null);
 
+  // 3D bottle rotation
+  const bottleRotRef = useRef<number | null>(null);
+
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
   }, []);
+
+  // ── Bottle rotation cleanup ──
+  useEffect(() => {
+    if (step !== "welcome" && bottleRotRef.current) {
+      cancelAnimationFrame(bottleRotRef.current);
+      bottleRotRef.current = null;
+    }
+  }, [step]);
 
   // ── First visit detection ──
   useEffect(() => {
@@ -301,6 +315,19 @@ export function TrailFlow() {
   }, [session?.user?.id, likedWines, dislikedWines, winesTriedTotal]);
 
   // ── Handlers ──
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSplineLoad = (spline: any) => {
+    const bottle = spline.findObjectByName("winebottle");
+    if (!bottle) return;
+    let angle = 0;
+    const tick = () => {
+      angle += 0.25;
+      bottle.rotation.y = (angle * Math.PI) / 180;
+      bottleRotRef.current = requestAnimationFrame(tick);
+    };
+    tick();
+  };
 
   const startTrail = () => {
     localStorage.setItem("trailStarted", "true");
@@ -505,9 +532,25 @@ export function TrailFlow() {
               )}
             </div>
 
-            {/* Wine glass */}
-            <div className="relative z-10">
-              <WineGlassHero onTap={startTrail} label={isFirstVisit ? "Kezdjük!" : "Folytatom"} dark />
+            {/* 3D wine bottle */}
+            <div className="relative z-10 flex flex-col items-center gap-4">
+              <div
+                className="w-full active:scale-95 transition-transform duration-150 cursor-pointer"
+                style={{ height: "340px" }}
+                onClick={startTrail}
+              >
+                <Spline
+                  scene="https://prod.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/scene.splinecode"
+                  onLoad={handleSplineLoad}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={startTrail}
+                className="rounded-full border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.1)] px-8 py-3 text-sm font-semibold uppercase tracking-widest text-[rgba(255,255,255,0.85)] backdrop-blur-sm active:scale-95 transition-transform"
+              >
+                {isFirstVisit ? "Kezdjük!" : "Folytatom"}
+              </button>
             </div>
 
             {/* Bottom actions */}
