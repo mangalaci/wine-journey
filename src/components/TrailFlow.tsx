@@ -1,10 +1,7 @@
 "use client";
 
-import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import dynamic from "next/dynamic";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-
-const Spline = dynamic(() => import("@splinetool/react-spline"), { ssr: false });
 import Link from "next/link";
 import { TasteProfileCard } from "@/components/TasteProfileCard";
 import { matchWine, type SemanticWineMatch } from "@/lib/semanticWineMatch";
@@ -112,32 +109,6 @@ function getSuggestion(likedWines: LikedWine[], dislikedWines: LikedWine[], excl
     .sort((a, b) => b.score - a.score)[0] ?? pool[0]!;
 }
 
-// ─── Spline error boundary ────────────────────────────────────────────────────
-
-class SplineBottle extends Component<{
-  onTap: () => void;
-  onLoad: (s: any) => void;
-  fallback: ReactNode;
-}, { error: boolean }> {
-  state = { error: false };
-  static getDerivedStateFromError() { return { error: true }; }
-  render() {
-    if (this.state.error) return this.props.fallback;
-    return (
-      <div
-        className="w-full cursor-pointer active:scale-95 transition-transform duration-150"
-        style={{ height: "340px" }}
-        onClick={this.props.onTap}
-      >
-        <Spline
-          scene="https://prod.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/scene.splinecode"
-          onLoad={this.props.onLoad}
-        />
-      </div>
-    );
-  }
-}
-
 // ─── Wine glass hero ──────────────────────────────────────────────────────────
 
 function WineGlassHero({ onTap, label, dark }: { onTap: () => void; label: string; dark?: boolean }) {
@@ -241,21 +212,11 @@ export function TrailFlow() {
   const streamRef = useRef<MediaStream | null>(null);
   const scanButtonRef = useRef<HTMLButtonElement>(null);
 
-  // 3D bottle rotation
-  const bottleRotRef = useRef<number | null>(null);
 
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
   }, []);
-
-  // ── Bottle rotation cleanup ──
-  useEffect(() => {
-    if (step !== "welcome" && bottleRotRef.current) {
-      cancelAnimationFrame(bottleRotRef.current);
-      bottleRotRef.current = null;
-    }
-  }, [step]);
 
   // ── First visit detection ──
   useEffect(() => {
@@ -341,22 +302,6 @@ export function TrailFlow() {
   }, [session?.user?.id, likedWines, dislikedWines, winesTriedTotal]);
 
   // ── Handlers ──
-
-  const handleSplineLoad = (spline: any) => {
-    try {
-      const bottle = spline.findObjectByName("winebottle");
-      if (!bottle) return;
-      let angle = 0;
-      const tick = () => {
-        try {
-          angle += 0.25;
-          bottle.rotation.y = (angle * Math.PI) / 180;
-          bottleRotRef.current = requestAnimationFrame(tick);
-        } catch { /* ignore */ }
-      };
-      tick();
-    } catch { /* ignore */ }
-  };
 
   const startTrail = () => {
     localStorage.setItem("trailStarted", "true");
@@ -561,13 +506,20 @@ export function TrailFlow() {
               )}
             </div>
 
-            {/* 3D wine bottle */}
+            {/* 3D wine bottle — Spline iframe embed */}
             <div className="relative z-10 flex flex-col items-center gap-4">
-              <SplineBottle
-                onTap={startTrail}
-                onLoad={handleSplineLoad}
-                fallback={<WineGlassHero onTap={startTrail} label={isFirstVisit ? "Kezdjük!" : "Folytatom"} dark />}
-              />
+              <div
+                className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 overflow-hidden rounded-2xl"
+                style={{ width: "260px", height: "340px" }}
+                onClick={startTrail}
+              >
+                <iframe
+                  src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
+                  style={{ width: "100%", height: "100%", border: "none" }}
+                  title="3D wine bottle"
+                  loading="lazy"
+                />
+              </div>
               <button
                 type="button"
                 onClick={startTrail}
