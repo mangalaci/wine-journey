@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useSession, signOut } from "next-auth/react";
 
@@ -110,6 +110,32 @@ function getSuggestion(likedWines: LikedWine[], dislikedWines: LikedWine[], excl
       score: w.tags.reduce((s, t) => s + (liked.has(t) ? 1 : 0) - (disliked.has(t) ? 0.5 : 0), 0),
     }))
     .sort((a, b) => b.score - a.score)[0] ?? pool[0]!;
+}
+
+// ─── Spline error boundary ────────────────────────────────────────────────────
+
+class SplineBottle extends Component<{
+  onTap: () => void;
+  onLoad: (s: any) => void;
+  fallback: ReactNode;
+}, { error: boolean }> {
+  state = { error: false };
+  static getDerivedStateFromError() { return { error: true }; }
+  render() {
+    if (this.state.error) return this.props.fallback;
+    return (
+      <div
+        className="w-full cursor-pointer active:scale-95 transition-transform duration-150"
+        style={{ height: "340px" }}
+        onClick={this.props.onTap}
+      >
+        <Spline
+          scene="https://prod.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/scene.splinecode"
+          onLoad={this.props.onLoad}
+        />
+      </div>
+    );
+  }
 }
 
 // ─── Wine glass hero ──────────────────────────────────────────────────────────
@@ -317,15 +343,19 @@ export function TrailFlow() {
   // ── Handlers ──
 
   const handleSplineLoad = (spline: any) => {
-    const bottle = spline.findObjectByName("winebottle");
-    if (!bottle) return;
-    let angle = 0;
-    const tick = () => {
-      angle += 0.25;
-      bottle.rotation.y = (angle * Math.PI) / 180;
-      bottleRotRef.current = requestAnimationFrame(tick);
-    };
-    tick();
+    try {
+      const bottle = spline.findObjectByName("winebottle");
+      if (!bottle) return;
+      let angle = 0;
+      const tick = () => {
+        try {
+          angle += 0.25;
+          bottle.rotation.y = (angle * Math.PI) / 180;
+          bottleRotRef.current = requestAnimationFrame(tick);
+        } catch { /* ignore */ }
+      };
+      tick();
+    } catch { /* ignore */ }
   };
 
   const startTrail = () => {
@@ -533,16 +563,11 @@ export function TrailFlow() {
 
             {/* 3D wine bottle */}
             <div className="relative z-10 flex flex-col items-center gap-4">
-              <div
-                className="w-full active:scale-95 transition-transform duration-150 cursor-pointer"
-                style={{ height: "340px" }}
-                onClick={startTrail}
-              >
-                <Spline
-                  scene="https://prod.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/scene.splinecode"
-                  onLoad={handleSplineLoad}
-                />
-              </div>
+              <SplineBottle
+                onTap={startTrail}
+                onLoad={handleSplineLoad}
+                fallback={<WineGlassHero onTap={startTrail} label={isFirstVisit ? "Kezdjük!" : "Folytatom"} dark />}
+              />
               <button
                 type="button"
                 onClick={startTrail}
