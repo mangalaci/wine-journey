@@ -316,7 +316,6 @@ export function TrailFlow() {
 
   // ── Handlers ──
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSplineLoad = (spline: any) => {
     const bottle = spline.findObjectByName("winebottle");
     if (!bottle) return;
