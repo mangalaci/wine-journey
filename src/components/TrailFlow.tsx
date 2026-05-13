@@ -511,7 +511,7 @@ export function TrailFlow() {
               {/* 3D wine bottle — Spline iframe embed */}
               <div
                 className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 relative overflow-hidden"
-                style={{ width: "min(70vw, 280px)", height: "min(340px, 44dvh)" }}
+                style={{ width: "min(80vw, 310px)", height: "min(440px, 52dvh)" }}
                 onClick={startTrail}
               >
                 <iframe
@@ -558,7 +558,7 @@ export function TrailFlow() {
               <button
                 type="button"
                 onClick={() => setStep("itallap")}
-                className="w-full rounded-xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] py-3 text-sm font-medium text-[rgba(255,255,255,0.55)] active:scale-95 transition-transform"
+                className="w-full py-1 text-xs text-[rgba(255,255,255,0.4)] underline underline-offset-2 active:opacity-70"
               >
                 📋 Étteremben vagy? Borlap fotózása
               </button>
