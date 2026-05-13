@@ -468,58 +468,73 @@ export function TrailFlow() {
 
         {/* WELCOME */}
         {step === "welcome" && (
-          <div className="flex flex-1 flex-col items-center justify-between py-8" style={{ animation: "screen-in 300ms ease-out" }}>
+          <div className="flex flex-1 flex-col items-center py-6" style={{ animation: "screen-in 300ms ease-out" }}>
             {/* Radial wine glow */}
             <div
               className="pointer-events-none absolute inset-0"
               style={{ background: "radial-gradient(ellipse at 50% 110%, rgba(140,28,46,0.38) 0%, transparent 62%)" }}
             />
 
-            {/* Heading */}
-            <div className="relative z-10 text-center">
-              {isFirstVisit ? (
-                <>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[rgba(255,255,255,0.35)]">Bortúra</p>
-                  <h1
-                    className="mt-3 text-[2.6rem] leading-[1.15] font-bold text-white"
-                    style={{ fontFamily: "var(--font-playfair)" }}
-                  >
-                    Fedezd fel<br />
-                    <em>az ízlésedet</em>
-                  </h1>
-                  <p className="mt-3 text-sm text-[rgba(255,255,255,0.42)] max-w-[210px] mx-auto leading-relaxed">
-                    Fotózz le egy bort — az app megtanulja, mi illik hozzád.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h1
-                    className="text-[2.2rem] font-bold text-white"
-                    style={{ fontFamily: "var(--font-playfair)" }}
-                  >
-                    Üdv vissza!
-                  </h1>
-                  {winesTriedTotal > 0 && (
-                    <p className="mt-2 text-sm text-[rgba(255,255,255,0.42)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
-                  )}
-                </>
-              )}
-            </div>
+            {/* Centre piece: heading + bottle + button */}
+            <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-5 w-full">
+              {/* Heading */}
+              <div className="text-center">
+                {isFirstVisit ? (
+                  <>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[rgba(255,255,255,0.35)]">Bortúra</p>
+                    <h1
+                      className="mt-3 text-[2.6rem] leading-[1.15] font-bold text-white"
+                      style={{ fontFamily: "var(--font-playfair)" }}
+                    >
+                      Fedezd fel<br />
+                      <em>az ízlésedet</em>
+                    </h1>
+                    <p className="mt-3 text-sm text-[rgba(255,255,255,0.42)] max-w-[210px] mx-auto leading-relaxed">
+                      Fotózz le egy bort — az app megtanulja, mi illik hozzád.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h1
+                      className="text-[2.2rem] font-bold text-white"
+                      style={{ fontFamily: "var(--font-playfair)" }}
+                    >
+                      Üdv vissza!
+                    </h1>
+                    {winesTriedTotal > 0 && (
+                      <p className="mt-2 text-sm text-[rgba(255,255,255,0.42)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
+                    )}
+                  </>
+                )}
+              </div>
 
-            {/* 3D wine bottle — Spline iframe embed */}
-            <div className="relative z-10 flex flex-col items-center gap-4">
+              {/* 3D wine bottle — Spline iframe embed */}
               <div
-                className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 overflow-hidden"
-                style={{ width: "min(100vw, 420px)", height: "420px" }}
+                className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 relative overflow-hidden"
+                style={{ width: "min(80vw, 320px)", height: "460px" }}
                 onClick={startTrail}
               >
                 <iframe
                   src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
-                  style={{ width: "100%", height: "calc(100% + 60px)", border: "none" }}
+                  style={{ width: "120%", height: "calc(100% + 60px)", border: "none", marginLeft: "-10%", marginTop: "-10px" }}
                   title="3D wine bottle"
                   loading="lazy"
                 />
+                {/* Wine label overlay */}
+                <div
+                  className="pointer-events-none absolute"
+                  style={{ top: "44%", left: "54%", transform: "translateX(-50%)", width: "68px" }}
+                >
+                  <div className="rounded bg-[rgba(245,240,225,0.90)] px-2 py-1.5 text-center">
+                    <p className="text-[5px] font-bold uppercase tracking-[0.15em] text-[#5a1a28]">Bortúra</p>
+                    <p className="text-[8px] font-bold text-[#2e0810]" style={{ fontFamily: "var(--font-playfair)" }}>2024</p>
+                    <div className="my-0.5 h-px bg-[rgba(90,26,40,0.25)]" />
+                    <p className="text-[5px] text-[#5a1a28] opacity-60">Magyarország</p>
+                  </div>
+                </div>
               </div>
+
+              {/* Continue button */}
               <button
                 type="button"
                 onClick={startTrail}
@@ -530,7 +545,7 @@ export function TrailFlow() {
             </div>
 
             {/* Bottom actions */}
-            <div className="relative z-10 w-full space-y-2">
+            <div className="relative z-10 w-full max-w-sm space-y-2 mt-4">
               {scanHistory.slice(0, 1).map((entry) => (
                 <div key={entry.id} className="flex items-center justify-between rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2.5">
                   <div className="min-w-0">
