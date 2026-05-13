@@ -503,22 +503,24 @@ export function TrailFlow() {
               {/* 3D wine bottle — Spline iframe embed */}
               <div
                 className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 relative overflow-hidden"
-                style={{ width: "min(80vw, 310px)", height: "min(380px, 48dvh)" }}
+                style={{ width: "min(80vw, 310px)", height: "min(400px, 50dvh)" }}
                 onClick={startTrail}
               >
                 <iframe
                   src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
-                  style={{ width: "100%", height: "100%", border: "none" }}
+                  style={{ width: "120%", height: "calc(100% + 60px)", border: "none", marginLeft: "-10%", marginTop: "-10px" }}
                   title="3D borosüveg"
                   loading="lazy"
                 />
+                {/* Spline badge takarása */}
+                <div className="absolute bottom-0 left-0 right-0 h-10 bg-[var(--bg)]" />
               </div>
 
               {/* Continue button */}
               <button
                 type="button"
                 onClick={startTrail}
-                className="rounded-full border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.1)] px-8 py-3 text-sm font-semibold uppercase tracking-widest text-[rgba(255,255,255,0.85)] backdrop-blur-sm active:scale-95 transition-transform"
+                className="rounded-full border border-[var(--accent)] bg-[var(--accent)] px-8 py-3 text-sm font-semibold uppercase tracking-widest text-white shadow-md active:scale-95 transition-transform"
               >
                 {isFirstVisit ? "Kezdjük!" : "Folytatom"}
               </button>
