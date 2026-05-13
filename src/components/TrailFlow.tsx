@@ -439,7 +439,7 @@ export function TrailFlow() {
       <header className="flex items-center justify-between px-5 pt-10 pb-4">
         <div>
           <p className={`text-[10px] font-semibold uppercase tracking-widest ${isDark ? "text-[rgba(255,255,255,0.3)]" : "text-[var(--muted)]"}`}>
-            {winesTriedTotal > 0 ? `${winesTriedTotal}. állomás` : "Bortúra"}
+            {winesTriedTotal > 0 ? `${winesTriedTotal}. állomás` : "Borangolo"}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -468,7 +468,7 @@ export function TrailFlow() {
 
         {/* WELCOME */}
         {step === "welcome" && (
-          <div className="flex flex-1 flex-col items-center py-6" style={{ animation: "screen-in 300ms ease-out" }}>
+          <div className="flex flex-1 flex-col items-center py-4" style={{ animation: "screen-in 300ms ease-out" }}>
             {/* Radial wine glow */}
             <div
               className="pointer-events-none absolute inset-0"
@@ -476,12 +476,12 @@ export function TrailFlow() {
             />
 
             {/* Centre piece: heading + bottle + button */}
-            <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-5 w-full">
+            <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-3 w-full">
               {/* Heading */}
               <div className="text-center">
                 {isFirstVisit ? (
                   <>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[rgba(255,255,255,0.35)]">Bortúra</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[rgba(255,255,255,0.35)]">Borangolo</p>
                     <h1
                       className="mt-3 text-[2.6rem] leading-[1.15] font-bold text-white"
                       style={{ fontFamily: "var(--font-playfair)" }}
@@ -511,7 +511,7 @@ export function TrailFlow() {
               {/* 3D wine bottle — Spline iframe embed */}
               <div
                 className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 relative overflow-hidden"
-                style={{ width: "min(80vw, 320px)", height: "460px" }}
+                style={{ width: "min(70vw, 280px)", height: "min(340px, 44dvh)" }}
                 onClick={startTrail}
               >
                 <iframe
@@ -526,7 +526,7 @@ export function TrailFlow() {
                   style={{ top: "44%", left: "54%", transform: "translateX(-50%)", width: "68px" }}
                 >
                   <div className="rounded bg-[rgba(245,240,225,0.90)] px-2 py-1.5 text-center">
-                    <p className="text-[5px] font-bold uppercase tracking-[0.15em] text-[#5a1a28]">Bortúra</p>
+                    <p className="text-[5px] font-bold uppercase tracking-[0.15em] text-[#5a1a28]">Borangolo</p>
                     <p className="text-[8px] font-bold text-[#2e0810]" style={{ fontFamily: "var(--font-playfair)" }}>2024</p>
                     <div className="my-0.5 h-px bg-[rgba(90,26,40,0.25)]" />
                     <p className="text-[5px] text-[#5a1a28] opacity-60">Magyarország</p>
@@ -569,7 +569,7 @@ export function TrailFlow() {
         {/* SCAN */}
         {step === "scan" && (
           <div className="animate-screen-in flex flex-1 flex-col gap-4">
-            <p className="text-center text-sm text-[var(--muted)]">Irányítsd a kamerát a palackra</p>
+            <p className="text-center text-sm text-[var(--muted)]">Irányítsd a kamerát a cimkére</p>
             <div className="relative mx-auto overflow-hidden rounded-3xl border border-[var(--border)] bg-black shadow-xl"
                  style={{ width: "min(100%, calc(65vh * 3 / 4))", aspectRatio: "3/4" }}>
               <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />

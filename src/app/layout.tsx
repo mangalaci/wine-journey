@@ -16,7 +16,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Bortúra",
+  title: "Borangolo",
   description: "Fedezd fel az ízlésedet",
 };
 
