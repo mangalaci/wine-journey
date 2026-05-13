@@ -5,18 +5,18 @@ import { useState } from "react";
 const SLIDES = [
   {
     emoji: "📸",
-    title: "Scan any wine",
-    body: "Point your camera at a label — we identify the wine instantly.",
+    title: "Fotózz borcímkét",
+    body: "Irányítsd a kamerát a címkére — mi felismerjük a bort.",
   },
   {
     emoji: "👍",
-    title: "Like or dislike",
-    body: "One tap tells us what you enjoy. We learn your taste with every bottle.",
+    title: "Tetszik vagy nem",
+    body: "Egy koppintás elmondja, mit szeretsz. Minden borral okosabbak leszünk.",
   },
   {
     emoji: "🍷",
-    title: "Get personalised picks",
-    body: "The more you scan, the smarter your recommendations become.",
+    title: "Személyes ajánlatok",
+    body: "Minél többet scannelünk, annál pontosabb borokat ajánlunk.",
   },
 ];
 
@@ -68,7 +68,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
           }}
           className="w-full rounded-full bg-[var(--accent)] px-6 py-4 text-base font-semibold text-white transition duration-150 active:scale-95"
         >
-          {isLast ? "Get started" : "Next"}
+          {isLast ? "Kezdjük" : "Tovább"}
         </button>
         {!isLast && (
           <button
@@ -76,7 +76,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
             onClick={onDone}
             className="text-sm text-[var(--muted)]"
           >
-            Skip
+            Kihagyom
           </button>
         )}
       </div>

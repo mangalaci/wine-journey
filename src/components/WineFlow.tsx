@@ -51,13 +51,13 @@ function getTagOverlapScore(preferredTags: Set<string>, wineTags: string[]): num
 }
 
 function explorerBadgeLabel(level: number): string | null {
-  if (level >= 10) return "Wine explorer";
-  if (level >= 5) return "Curious taster";
-  if (level >= 3) return "Getting started";
+  if (level >= 10) return "Bor felfedező";
+  if (level >= 5) return "Kíváncsi kóstoló";
+  if (level >= 3) return "Kezdő borbarát";
   return null;
 }
 
-/** Fills toward Lv.10 (matches top “Wine explorer” tier). */
+/** Kitölti a szintjelzőt max 10-ig, a Bor felfedező szinthez. */
 function explorerLevelProgressPercent(level: number): number {
   const cap = 10;
   if (level <= 0) return 0;
@@ -299,11 +299,11 @@ export function WineFlow() {
 
     const msg =
       level === 3
-        ? "🎉 You're getting started!"
+        ? "🎉 Már kezded felfedezni az ízlésedet!"
         : level === 5
-          ? "🔥 Curious taster!"
+          ? "🔥 Kíváncsi kóstoló lettél!"
           : level === 10
-            ? "🚀 Wine explorer!"
+            ? "🚀 Bor felfedezőként ragyogsz!"
             : null;
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -372,12 +372,12 @@ export function WineFlow() {
       });
       const data = await res.json() as WineData & { error?: string };
       if (!res.ok || data.error) {
-        setScanError(data.error ?? "Could not identify wine");
+        setScanError(data.error ?? "Nem sikerült azonosítani a bort");
       } else {
         setScannedWine(data);
       }
     } catch {
-      setScanError("Network error — try again");
+      setScanError("Hálózati hiba — próbáld újra");
     } finally {
       setScanning(false);
     }
@@ -547,7 +547,7 @@ export function WineFlow() {
               style={{ willChange: "border-radius, transform" }}
             >
               <span className="text-5xl mb-2 select-none">🍷</span>
-              <span className="text-lg font-bold tracking-wide select-none">Scan wine</span>
+              <span className="text-lg font-bold tracking-wide select-none">Bort fotózok</span>
             </button>
 
             <p className="relative z-10 mt-5 text-xs text-[var(--muted)] text-center">
@@ -604,14 +604,14 @@ export function WineFlow() {
               onClick={() => setStep("home")}
               className="flex-1 rounded-xl border border-[var(--border)] bg-white py-3 text-sm font-medium text-[var(--ink)] transition duration-150 active:scale-95"
             >
-              Cancel
+              Mégse
             </button>
             <button
               type="button"
               onClick={handleCapture}
               className="flex-1 rounded-xl bg-[var(--accent)] py-3 text-sm font-semibold text-white transition duration-150 active:scale-95"
             >
-              Capture
+              Fotózás
             </button>
           </div>
         </div>
@@ -623,7 +623,7 @@ export function WineFlow() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={captureUrl}
-              alt="Your capture"
+              alt="Borfotó"
               className="aspect-[4/3] w-full object-cover"
             />
           </div>
@@ -634,7 +634,7 @@ export function WineFlow() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
-              <p className="text-sm text-[var(--muted)]">Identifying wine…</p>
+              <p className="text-sm text-[var(--muted)]">Bor azonosítása…</p>
             </div>
           )}
 
@@ -647,7 +647,7 @@ export function WineFlow() {
           {scannedWine && !scanning && (
             <article className="rounded-2xl border border-[var(--border)] bg-white px-4 py-5 shadow-sm">
               <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
-                Identified
+                Azonosítva
               </p>
               <h2 className="mt-1 text-xl font-semibold">{scannedWine.name}</h2>
               <p className="mt-1 text-sm text-[var(--muted)]">{scannedWine.region}</p>
@@ -668,7 +668,7 @@ export function WineFlow() {
               }}
               className="flex-1 rounded-full border border-[var(--border)] bg-white px-6 py-4 text-base font-semibold text-[var(--ink)] transition duration-150 active:scale-95 disabled:opacity-40"
             >
-              Try again
+              Próbáld újra
             </button>
             <button
               type="button"
@@ -680,7 +680,7 @@ export function WineFlow() {
               }}
               className="flex-1 rounded-full bg-[var(--accent)] px-6 py-4 text-center text-base font-semibold text-white transition duration-150 active:scale-95 disabled:opacity-40"
             >
-              Continue
+              Folytatom
             </button>
           </div>
         </div>
@@ -689,7 +689,7 @@ export function WineFlow() {
       {step === "feedback" && (
         <div className="animate-screen-in flex flex-col gap-8 py-4">
           <p className="text-center text-lg font-medium text-[var(--ink)]">
-            Did you like it?
+            Ízlett?
           </p>
           <div className="flex justify-center gap-6">
             <button
@@ -783,7 +783,7 @@ export function WineFlow() {
 
           {vote === "down" ? (
             <p className="text-center text-sm text-[var(--muted)]">
-              Noted — we&apos;ll steer differently next time.
+              Feljegyezve — legközelebb más irányba megyünk.
             </p>
           ) : null}
 
@@ -800,7 +800,7 @@ export function WineFlow() {
               ) : null}
               <div className="space-y-2 border-b border-[var(--border)] pb-4 text-center">
                 <p className="text-sm font-semibold text-[var(--ink)]">
-                  🍷 Wine Explorer Lv. {winesTriedThisSession}
+                  🍷 Bor felfedező szint: {winesTriedThisSession}
                 </p>
                 {explorerBadge ? (
                   <p className="text-xs font-medium text-[var(--muted)]">
@@ -813,7 +813,7 @@ export function WineFlow() {
                   aria-valuenow={Math.min(winesTriedThisSession, 10)}
                   aria-valuemin={0}
                   aria-valuemax={10}
-                  aria-label="Wine explorer level progress"
+                  aria-label="Bor felfedező szintelőrehaladás"
                 >
                   <div
                     className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-300 ease-out"
@@ -824,7 +824,7 @@ export function WineFlow() {
               <TasteProfileCard profile={tasteProfile} radar={tasteRadar} compact />
               <ProgressIndicator likedCount={likedCount} />
               <p className="text-sm font-medium text-[var(--ink)]">
-                Because you liked this style
+                Mert ez a stílus tetszett
               </p>
               <div className="flex flex-wrap items-center justify-center gap-1 text-center">
                 <button
@@ -836,7 +836,7 @@ export function WineFlow() {
                       : "text-[var(--muted)] hover:text-[var(--ink)]"
                   }`}
                 >
-                  For you
+                  Neked
                 </button>
                 <span className="text-[var(--muted)] text-xs" aria-hidden>
                   |
@@ -850,7 +850,7 @@ export function WineFlow() {
                       : "text-[var(--muted)] hover:text-[var(--ink)]"
                   }`}
                 >
-                  Explore
+                  Felfedezés
                 </button>
               </div>
               <ul className="space-y-3">
@@ -874,22 +874,21 @@ export function WineFlow() {
                   className="text-center text-sm font-medium text-[var(--ink)]"
                   role="status"
                 >
-                  🍷 Your taste profile is forming
+                  🍷 Már formálódik az ízlésed
                 </p>
               ) : null}
               <p className="text-center text-sm leading-relaxed text-[var(--muted)]">
-                You&apos;re getting closer to your perfect wine
+                Közelebb kerülsz a tökéletes borhoz
               </p>
               <p className="text-center text-xs text-[var(--muted)]">
-                You&apos;ve tried {winesTriedThisSession}{" "}
-                {winesTriedThisSession === 1 ? "wine" : "wines"} in this session
+                Eddig {winesTriedThisSession} {winesTriedThisSession === 1 ? "bort" : "bort"} próbáltál ki ebben a sessionben
               </p>
               <button
                 type="button"
                 onClick={resetFlow}
                 className="rounded-full border border-[var(--border)] bg-white py-3.5 text-sm font-semibold text-[var(--ink)] transition duration-150 active:scale-95"
               >
-                Refine your taste 🍷
+                Finomítsd az ízlésed 🍷
               </button>
             </div>
           ) : null}

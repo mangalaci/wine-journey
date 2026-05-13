@@ -5,7 +5,7 @@ export type LikedWine = {
 
 export function buildTasteProfile(likedWines: LikedWine[]): string {
   if (likedWines.length === 0) {
-    return "You're still exploring your taste";
+    return "Még felfedezed az ízlésed";
   }
 
   // Weighted frequency: each tag occurrence across liked wines contributes +1.
@@ -18,7 +18,7 @@ export function buildTasteProfile(likedWines: LikedWine[]): string {
 
   const rankedTags = Object.entries(tagFrequency).sort((a, b) => b[1] - a[1]);
   if (rankedTags.length === 0) {
-    return "You're still exploring your taste";
+    return "Még felfedezed az ízlésed";
   }
 
   const [[topTag, topCount], [, secondCount = 0] = []] = rankedTags;
@@ -31,7 +31,7 @@ export function buildTasteProfile(likedWines: LikedWine[]): string {
       .slice(0, 1)
       .map(([tag]) => tag);
     const strongTags = [topTag, ...alsoStrong];
-    return `You strongly prefer ${strongTags.join(", ")} wines`;
+    return `Erősen a ${strongTags.join(", ")} stílus felé hajlasz`;
   }
 
   const highTags = rankedTags
@@ -40,8 +40,8 @@ export function buildTasteProfile(likedWines: LikedWine[]): string {
     .map(([tag]) => tag);
 
   if (highTags.length > 1) {
-    return `You lean towards ${highTags.join(", ")} wines`;
+    return `Inkább a ${highTags.join(", ")} borokat kedveled`;
   }
 
-  return `You lean towards ${topTag} wines`;
+  return `Inkább a ${topTag} borokat kedveled`;
 }

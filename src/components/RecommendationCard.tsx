@@ -8,15 +8,15 @@ type RecommendationCardProps = {
 };
 
 const TIER_LABEL: Record<RecommendationTier, string> = {
-  safe: "Safe",
-  premium: "Premium",
-  explore: "Explore",
+  safe: "Biztos választás",
+  premium: "Prémium",
+  explore: "Felfedezés",
 };
 
 const TIER_FALLBACK_REASON: Record<RecommendationTier, string> = {
-  safe: "Matches your taste",
-  premium: "A step up in quality",
-  explore: "Try something new",
+  safe: "Az ízlésedhez igazítva",
+  premium: "Minőségi feljebb lépés",
+  explore: "Próbálj ki valami újat",
 };
 
 export function RecommendationCard({
@@ -28,7 +28,7 @@ export function RecommendationCard({
   const label = TIER_LABEL[tier];
   const reason =
     matchedTags && matchedTags.length > 0
-      ? `Because you like ${matchedTags.join(", ")} wines`
+      ? `Mert ez a stílus illik hozzád: ${matchedTags.join(", ")}`
       : TIER_FALLBACK_REASON[tier];
 
   return (

@@ -138,7 +138,7 @@ export function TasteProfileCard({ profile, radar, compact }: Props) {
     return (
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--accent-soft)] px-4 py-3 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-          Your taste profile
+          Ízprofilod
         </p>
         <p className="mt-1 text-sm font-medium text-[var(--ink)]">{profile}</p>
       </section>
@@ -148,7 +148,7 @@ export function TasteProfileCard({ profile, radar, compact }: Props) {
   return (
     <section className="rounded-2xl border border-[var(--border)] bg-white px-4 py-5 shadow-sm">
       <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
-        Your Palate
+        Ízpaletta
       </p>
       <p className="mt-1 text-sm font-medium text-[var(--ink)]">{profile}</p>
 
@@ -168,7 +168,7 @@ export function TasteProfileCard({ profile, radar, compact }: Props) {
         </div>
       ) : (
         <p className="mt-3 text-xs text-[var(--muted)]">
-          Rate a few wines to see your taste DNA emerge.
+          Értékelj néhány bort, hogy látható legyen az ízlésed mintázata.
         </p>
       )}
     </section>

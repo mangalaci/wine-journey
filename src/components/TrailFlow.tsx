@@ -456,9 +456,9 @@ export function TrailFlow() {
             <span>Profil</span>
           </button>
           {session ? (
-            <button type="button" onClick={() => signOut()} className={`text-[10px] ${isDark ? "text-[rgba(255,255,255,0.3)]" : "text-[var(--muted)]"}`}>Ki</button>
+            <button type="button" onClick={() => signOut()} className={`text-[10px] ${isDark ? "text-[rgba(255,255,255,0.3)]" : "text-[var(--muted)]"}`}>Kilépés</button>
           ) : (
-            <Link href="/auth/login" className={`text-[10px] font-medium ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-[var(--accent)]"}`}>Be</Link>
+            <Link href="/auth/login" className={`text-[10px] font-medium ${isDark ? "text-[rgba(255,255,255,0.6)]" : "text-[var(--accent)]"}`}>Bejelentkezés</Link>
           )}
         </div>
       </header>
@@ -517,7 +517,7 @@ export function TrailFlow() {
                 <iframe
                   src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
                   style={{ width: "120%", height: "calc(100% + 60px)", border: "none", marginLeft: "-10%", marginTop: "-10px" }}
-                  title="3D wine bottle"
+                  title="3D borosüveg"
                   loading="lazy"
                 />
                 {/* Wine label overlay */}
@@ -615,7 +615,7 @@ export function TrailFlow() {
             {captureUrl && (
               <div className="w-full overflow-hidden rounded-3xl border border-[var(--border)] shadow-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={captureUrl} alt="Scan" className="aspect-[4/3] w-full object-cover" />
+                <img src={captureUrl} alt="Borkép" className="aspect-[4/3] w-full object-cover" />
               </div>
             )}
             <div className="flex items-center gap-3">
