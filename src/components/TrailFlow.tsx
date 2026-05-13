@@ -508,7 +508,7 @@ export function TrailFlow() {
               >
                 <iframe
                   src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
-                  style={{ position: "absolute", width: "150%", height: "160%", left: "-25%", top: "20%", border: "none" }}
+                  style={{ width: "100%", height: "100%", border: "none" }}
                   title="3D borosüveg"
                   loading="lazy"
                 />
