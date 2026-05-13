@@ -476,7 +476,7 @@ export function WineFlow() {
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
             Sip & learn
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)]">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)] font-chilidog">
             Wine scanner
           </h1>
         </div>

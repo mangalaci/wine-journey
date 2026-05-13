@@ -430,15 +430,15 @@ export function TrailFlow() {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  const isDark = step === "welcome";
+  const isDark = false;
 
   return (
-    <div className={`relative flex min-h-dvh flex-col transition-colors duration-500 ${isDark ? "bg-[#0a0306]" : "bg-[var(--bg)]"}`}>
+    <div className="relative flex min-h-dvh flex-col transition-colors duration-500 bg-[var(--bg)]">
 
       {/* ── Top bar ── */}
       <header className="flex items-center justify-between px-5 pt-10 pb-4">
         <div>
-          <p className={`text-[10px] font-semibold uppercase tracking-widest ${isDark ? "text-[rgba(255,255,255,0.3)]" : "text-[var(--muted)]"}`}>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">
             {winesTriedTotal > 0 ? `${winesTriedTotal}. állomás` : "Borangolo"}
           </p>
         </div>
@@ -446,11 +446,7 @@ export function TrailFlow() {
           <button
             type="button"
             onClick={() => setShowProfile(true)}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm ${
-              isDark
-                ? "border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.07)] text-[rgba(255,255,255,0.8)]"
-                : "border-[var(--border)] bg-white text-[var(--ink)]"
-            }`}
+            className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-medium shadow-sm text-[var(--ink)]"
           >
             <span>🧬</span>
             <span>Profil</span>
@@ -469,12 +465,11 @@ export function TrailFlow() {
         {/* WELCOME */}
         {step === "welcome" && (
           <div className="flex flex-1 flex-col items-center py-4" style={{ animation: "screen-in 300ms ease-out" }}>
-            {/* Radial wine glow */}
+            {/* Radial accent glow */}
             <div
               className="pointer-events-none absolute inset-0"
-              style={{ background: "radial-gradient(ellipse at 50% 110%, rgba(140,28,46,0.38) 0%, transparent 62%)" }}
+              style={{ background: "radial-gradient(ellipse at 50% 110%, rgba(78,160,153,0.24) 0%, transparent 62%)" }}
             />
-
             {/* Centre piece: heading + bottle + button */}
             <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-3 w-full">
               {/* Heading */}
@@ -483,26 +478,23 @@ export function TrailFlow() {
                   <>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[rgba(255,255,255,0.35)]">Borangolo</p>
                     <h1
-                      className="mt-3 text-[2.6rem] leading-[1.15] font-bold text-white"
-                      style={{ fontFamily: "var(--font-playfair)" }}
+                      className="mt-3 text-[2.6rem] leading-[1.15] font-bold text-[var(--ink)] font-chilidog"
                     >
-                      Fedezd fel<br />
-                      <em>az ízlésedet</em>
+                      Fedezd fel az ízlésedet!
                     </h1>
-                    <p className="mt-3 text-sm text-[rgba(255,255,255,0.42)] max-w-[210px] mx-auto leading-relaxed">
+                    <p className="mt-3 text-sm text-[var(--muted)] max-w-[210px] mx-auto leading-relaxed">
                       Fotózz le egy bort — az app megtanulja, mi illik hozzád.
                     </p>
                   </>
                 ) : (
                   <>
                     <h1
-                      className="text-[2.2rem] font-bold text-white"
-                      style={{ fontFamily: "var(--font-playfair)" }}
+                      className="text-[2.2rem] font-bold text-[var(--ink)] font-chilidog"
                     >
                       Üdv vissza!
                     </h1>
                     {winesTriedTotal > 0 && (
-                      <p className="mt-2 text-sm text-[rgba(255,255,255,0.42)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
+                      <p className="mt-2 text-sm text-[var(--muted)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
                     )}
                   </>
                 )}
@@ -527,9 +519,9 @@ export function TrailFlow() {
                 >
                   <div className="rounded bg-[rgba(245,240,225,0.90)] px-2 py-1.5 text-center">
                     <p className="text-[5px] font-bold uppercase tracking-[0.15em] text-[#5a1a28]">Borangolo</p>
-                    <p className="text-[8px] font-bold text-[#2e0810]" style={{ fontFamily: "var(--font-playfair)" }}>2024</p>
-                    <div className="my-0.5 h-px bg-[rgba(90,26,40,0.25)]" />
-                    <p className="text-[5px] text-[#5a1a28] opacity-60">Magyarország</p>
+                    <p className="text-[8px] font-bold text-[#173a43]" style={{ fontFamily: "var(--font-playfair)" }}>2024</p>
+                    <div className="my-0.5 h-px bg-[rgba(34,104,111,0.25)]" />
+                    <p className="text-[5px] text-[#173a43] opacity-70">Magyarország</p>
                   </div>
                 </div>
               </div>
@@ -640,7 +632,7 @@ export function TrailFlow() {
               <>
                 {/* Premium wine card */}
                 <article className="overflow-hidden rounded-3xl" style={{ boxShadow: "0 8px 40px rgba(140,28,46,0.18)" }}>
-                  <div className="bg-gradient-to-br from-[#8c1c2c] to-[#2e0810] px-5 py-5">
+                  <div className="bg-gradient-to-br from-[var(--accent)] to-[#173a43] px-5 py-5">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[rgba(255,255,255,0.4)]">Azonosítva</p>
                     <h2
                       className="mt-1.5 text-2xl font-bold text-white leading-tight"
@@ -711,7 +703,7 @@ export function TrailFlow() {
               <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
                 {winesTriedTotal}. állomás
               </p>
-              <h2 className="mt-2 text-2xl font-bold text-[var(--ink)]">{currentMilestone.text}</h2>
+              <h2 className="mt-2 text-2xl font-bold text-[var(--ink)] font-chilidog">{currentMilestone.text}</h2>
             </div>
           </div>
         )}
@@ -723,7 +715,7 @@ export function TrailFlow() {
               <>
                 <div className="text-center">
                   <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">Ízlésprofil</p>
-                  <h2 className="mt-2 text-xl font-bold text-[var(--ink)]">Még alakul a képed...</h2>
+                  <h2 className="mt-2 text-xl font-bold text-[var(--ink)] font-chilidog">Még alakul a képed...</h2>
                 </div>
                 <div className="rounded-2xl border border-[var(--border)] bg-white px-5 py-6 shadow-sm space-y-4">
                   <p className="text-sm text-[var(--muted)] text-center">
@@ -744,7 +736,7 @@ export function TrailFlow() {
                   <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
                     {winesTriedTotal === 3 ? "Elkészült az első képed!" : "Így változott az ízlésed"}
                   </p>
-                  <h2 className="mt-2 text-xl font-bold text-[var(--ink)]">A te bor-DNS-ed</h2>
+                  <h2 className="mt-2 text-xl font-bold text-[var(--ink)] font-chilidog">A te bor-DNS-ed</h2>
                 </div>
                 <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
               </>
@@ -764,7 +756,7 @@ export function TrailFlow() {
         {step === "suggestion" && (
           <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-[var(--ink)]">Kérsz javaslatot?</h2>
+              <h2 className="text-2xl font-bold text-[var(--ink)] font-chilidog">Kérsz javaslatot?</h2>
               <p className="mt-2 text-sm text-[var(--muted)]">A következő borra</p>
             </div>
 
@@ -827,7 +819,7 @@ export function TrailFlow() {
           <div className="animate-screen-in flex flex-1 flex-col gap-4">
             <div className="text-center">
               <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">Borlap</p>
-              <h2 className="mt-1 text-lg font-bold text-[var(--ink)]">Fotózd le az éttermi borlapot</h2>
+              <h2 className="mt-1 text-lg font-bold text-[var(--ink)] font-chilidog">Fotózd le az éttermi borlapot</h2>
               <p className="mt-1 text-xs text-[var(--muted)]">Az egész lapot próbáld befogni</p>
             </div>
             <div

@@ -11,6 +11,7 @@ export default {
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         playfair: ["var(--font-playfair)", "Georgia", "serif"],
+        chilidog: ["var(--font-chilidog)", "fantasy"],
       },
     },
   },
