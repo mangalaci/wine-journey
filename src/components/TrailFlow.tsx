@@ -503,19 +503,24 @@ export function TrailFlow() {
               {/* 3D wine bottle — Spline iframe embed */}
               <div
                 className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 relative overflow-hidden"
-                style={{ width: "min(80vw, 310px)", height: "min(460px, 54dvh)" }}
+                style={{ width: "min(80vw, 310px)", height: "clamp(350px, 80vh, 700px)" }}
                 onClick={startTrail}
               >
                 <iframe
                   src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
-                  style={{ width: "110%", height: "calc(100% + 100px)", border: "none", marginLeft: "-5%", marginTop: "-20px" }}
+                  style={{ position: "absolute", width: "150%", height: "150%", left: "-70%", top: "35%", border: "none" }}
                   title="3D borosüveg"
                   loading="lazy"
+                />
+                {/* Overlay to hide Spline labels */}
+                <div
+                  className="absolute bottom-0 right-0 w-20 h-10 bg-[var(--bg)] pointer-events-none"
+                  style={{ zIndex: 1 }}
                 />
                 {/* Wine label overlay */}
                 <div
                   className="pointer-events-none absolute"
-                  style={{ top: "52%", left: "50%", transform: "translate(-50%, -50%)", width: "82px" }}
+                  style={{ top: "48%", left: "48%", transform: "translate(-50%, -50%)", width: "82px" }}
                 >
                   <div className="rounded bg-[rgba(245,240,225,0.90)] px-2 py-1.5 text-center">
                     <p className="text-[5px] font-bold uppercase tracking-[0.15em] text-[#5a1a28]">Borangolo</p>
