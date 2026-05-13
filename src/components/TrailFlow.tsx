@@ -508,12 +508,12 @@ export function TrailFlow() {
               >
                 <iframe
                   src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
-                  style={{ width: "120%", height: "calc(100% + 60px)", border: "none", marginLeft: "-10%", marginTop: "-10px" }}
+                  style={{ width: "120%", height: "calc(100% + 60px)", border: "none", marginLeft: "-10%", marginTop: "0" }}
                   title="3D borosüveg"
                   loading="lazy"
                 />
                 {/* Spline badge takarása */}
-                <div className="absolute bottom-0 left-0 right-0 h-10 bg-[var(--bg)]" />
+                <div className="absolute bottom-0 left-0 right-0 h-10" style={{ background: "linear-gradient(to bottom, transparent, var(--bg))" }} />
               </div>
 
               {/* Continue button */}
