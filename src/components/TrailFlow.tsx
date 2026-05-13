@@ -508,27 +508,10 @@ export function TrailFlow() {
               >
                 <iframe
                   src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
-                  style={{ position: "absolute", width: "150%", height: "150%", left: "-70%", top: "35%", border: "none" }}
+                  style={{ position: "absolute", width: "150%", height: "160%", left: "-25%", top: "20%", border: "none" }}
                   title="3D borosüveg"
                   loading="lazy"
                 />
-                {/* Overlay to hide Spline labels */}
-                <div
-                  className="absolute bottom-0 right-0 w-20 h-10 bg-[var(--bg)] pointer-events-none"
-                  style={{ zIndex: 1 }}
-                />
-                {/* Wine label overlay */}
-                <div
-                  className="pointer-events-none absolute"
-                  style={{ top: "48%", left: "48%", transform: "translate(-50%, -50%)", width: "82px" }}
-                >
-                  <div className="rounded bg-[rgba(245,240,225,0.90)] px-2 py-1.5 text-center">
-                    <p className="text-[5px] font-bold uppercase tracking-[0.15em] text-[#5a1a28]">Borangolo</p>
-                    <p className="text-[8px] font-bold text-[#173a43]" style={{ fontFamily: "var(--font-playfair)" }}>2024</p>
-                    <div className="my-0.5 h-px bg-[rgba(34,104,111,0.25)]" />
-                    <p className="text-[5px] text-[#173a43] opacity-70">Magyarország</p>
-                  </div>
-                </div>
               </div>
 
               {/* Continue button */}
