@@ -3,11 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { TasteProfileCard } from "@/components/TasteProfileCard";
 import { matchWine, type SemanticWineMatch } from "@/lib/semanticWineMatch";
 import { buildTasteProfile, type LikedWine } from "@/lib/tasteProfile";
 import { buildTasteRadar } from "@/lib/tasteRadar";
 import { WINE_REFERENCE } from "@/lib/wineReference";
+import waveData from "@/lottie/wave-bg.json";
+
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -484,6 +488,21 @@ export function TrailFlow() {
         {/* WELCOME */}
         {step === "welcome" && (
           <div className="flex flex-1 flex-col items-center py-4" style={{ animation: "screen-in 300ms ease-out" }}>
+            {/* Wave background */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 overflow-hidden" style={{ height: "58%", zIndex: 0 }}>
+              <Lottie
+                animationData={waveData}
+                loop
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                rendererSettings={{ preserveAspectRatio: "xMidYMax slice" } as any}
+                style={{ width: "100%", height: "100%" }}
+              />
+              {/* Fade to app background at top edge */}
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0"
+                style={{ height: "35%", background: "linear-gradient(to bottom, var(--bg), transparent)" }}
+              />
+            </div>
             {/* Radial accent glow */}
             <div
               className="pointer-events-none absolute inset-0"
