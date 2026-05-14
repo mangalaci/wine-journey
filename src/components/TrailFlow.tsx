@@ -135,7 +135,7 @@ function WineGlassHero({ onTap }: { onTap: () => void }) {
       aria-label="Tovább"
     >
       <div
-        className={clinking ? "animate-glass-clink" : "animate-float-1"}
+        className={clinking ? "animate-glass-clink" : ""}
         style={{ filter: "drop-shadow(0 8px 32px rgba(140,28,46,0.30))" }}
       >
         <svg viewBox="0 0 100 155" className="w-52" aria-hidden>
