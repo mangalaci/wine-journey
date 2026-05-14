@@ -10,7 +10,7 @@ import { buildTasteProfile, type LikedWine } from "@/lib/tasteProfile";
 import { buildTasteRadar } from "@/lib/tasteRadar";
 import { WINE_REFERENCE } from "@/lib/wineReference";
 import waveData from "@/lottie/wave-bg.json";
-import loadingWineData from "@/lottie/loading-wine.json";
+import cheersWineData from "@/lottie/cheers-wine.json";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
@@ -537,22 +537,26 @@ export function TrailFlow() {
                 )}
               </div>
 
-              <WineGlassHero onTap={startTrail} />
+              <Lottie
+                animationData={cheersWineData}
+                loop
+                style={{ width: 280, height: 187 }}
+              />
             </div>
 
             {/* Bottom actions */}
-            <div className="relative z-10 w-full max-w-sm space-y-3 mt-4">
+            <div className="relative z-10 w-full max-w-sm space-y-2 mt-4">
               <button
                 type="button"
                 onClick={startTrail}
-                className="w-full rounded-full bg-[var(--accent)] py-3 text-xl text-white shadow-md active:scale-95 transition-transform font-chilidog"
+                className="w-full rounded-full bg-[var(--accent)] py-2.5 text-base text-white shadow-md active:scale-95 transition-transform"
               >
                 {isFirstVisit ? "Kezdjük!" : "Folytatom"}
               </button>
               <button
                 type="button"
                 onClick={() => setStep("itallap")}
-                className="w-full py-1 text-xs text-[var(--muted)] underline underline-offset-2 active:opacity-70"
+                className="w-full rounded-full border border-[var(--accent)] py-2.5 text-base text-[var(--accent)] active:scale-95 transition-transform"
               >
                 📋 Étteremben vagy? Borlap fotózása
               </button>
