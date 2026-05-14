@@ -249,6 +249,19 @@ export function TrailFlow() {
     if (seen) setStep("welcome");
   }, []);
 
+  // ── Android/mobile back button ──
+  useEffect(() => {
+    const onPop = () => {
+      if (showProfile) { setShowProfile(false); return; }
+      if (step !== "welcome") { setStep("welcome"); stopCamera(); }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [showProfile, step, stopCamera]);
+
+  const openProfile = () => { history.pushState(null, ""); setShowProfile(true); };
+  const goToItallap = () => { history.pushState(null, ""); setStep("itallap"); };
+
   // ── Camera ──
   useEffect(() => {
     if (step !== "scan" && step !== "itallap") { stopCamera(); return; }
@@ -469,8 +482,8 @@ export function TrailFlow() {
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setShowProfile(true)}
-            className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-xs font-medium shadow-sm text-[var(--ink)]"
+            onClick={openProfile}
+            className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]"
           >
             <span>🧬</span>
             <span>Profil</span>
@@ -551,8 +564,8 @@ export function TrailFlow() {
               </button>
               <button
                 type="button"
-                onClick={() => setStep("itallap")}
-                className="w-full rounded-full border border-[var(--accent)] py-2.5 text-base text-[var(--accent)] active:scale-95 transition-transform"
+                onClick={goToItallap}
+                className="w-full rounded-full border border-white/60 py-2.5 text-base text-white active:scale-95 transition-transform"
               >
                 📋 Étteremben vagy? Borlap fotózása
               </button>
