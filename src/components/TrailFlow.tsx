@@ -509,7 +509,7 @@ export function TrailFlow() {
               style={{ background: "radial-gradient(ellipse at 50% 110%, rgba(78,160,153,0.24) 0%, transparent 62%)" }}
             />
             {/* Centre piece: heading + bottle + button */}
-            <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-3 w-full">
+            <div className="relative z-10 flex flex-1 flex-col items-center justify-end gap-3 w-full pb-2">
               {/* Heading */}
               <div className="text-center">
                 {isFirstVisit ? (
