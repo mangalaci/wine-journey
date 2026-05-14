@@ -456,7 +456,7 @@ export function TrailFlow() {
   const isDark = false;
 
   return (
-    <div className="relative flex h-dvh overflow-hidden flex-col transition-colors duration-500 bg-[var(--bg)]">
+    <div className="relative flex min-h-dvh flex-col transition-colors duration-500 bg-[var(--bg)]">
 
       {/* ── Top bar ── */}
       <header className="flex items-center justify-between px-5 pt-10 pb-4">
@@ -526,11 +526,9 @@ export function TrailFlow() {
                   </>
                 ) : (
                   <>
-                    <div className="rounded-full border-2 border-[var(--accent)] bg-white px-8 py-3 shadow-md">
-                      <h1 className="text-[2rem] font-chilidog" style={{ color: "var(--accent)" }}>
-                        Üdv vissza!
-                      </h1>
-                    </div>
+                    <h1 className="text-[2rem] font-chilidog" style={{ color: "var(--accent)" }}>
+                      Üdv vissza!
+                    </h1>
                     {winesTriedTotal > 0 && (
                       <p className="mt-2 text-sm text-[var(--muted)]">{winesTriedTotal} bor mögötted — folytatjuk?</p>
                     )}
