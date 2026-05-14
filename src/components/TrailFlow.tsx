@@ -343,6 +343,7 @@ export function TrailFlow() {
   const startTrail = () => {
     localStorage.setItem("trailStarted", "true");
     setIsFirstVisit(false);
+    history.pushState(null, "");
     setStep("scan");
   };
 
