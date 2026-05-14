@@ -11,6 +11,7 @@ import { buildTasteRadar } from "@/lib/tasteRadar";
 import { WINE_REFERENCE } from "@/lib/wineReference";
 import waveData from "@/lottie/wave-bg.json";
 import cheersWineData from "@/lottie/cheers-wine.json";
+import loadingWineData from "@/lottie/loading-wine.json";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
@@ -619,20 +620,15 @@ export function TrailFlow() {
 
         {/* IDENTIFYING */}
         {step === "identifying" && (
-          <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6">
+          <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-4">
             {captureUrl && (
-              <div className="w-full overflow-hidden rounded-3xl border border-[var(--border)] shadow-lg">
+              <div className="w-48 overflow-hidden rounded-2xl border border-[var(--border)] shadow-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={captureUrl} alt="Borkép" className="aspect-[4/3] w-full object-cover" />
+                <img src={captureUrl} alt="Borkép" className="aspect-[3/4] w-full object-cover" />
               </div>
             )}
-            <div className="flex items-center gap-3">
-              <svg className="h-5 w-5 animate-spin text-[var(--accent)]" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-              </svg>
-              <p className="text-sm text-[var(--muted)]">Azonosítás folyamatban…</p>
-            </div>
+            <Lottie animationData={loadingWineData} loop style={{ width: 160, height: 160 }} />
+            <p className="text-sm text-[var(--muted)]">Azonosítás folyamatban…</p>
           </div>
         )}
 
