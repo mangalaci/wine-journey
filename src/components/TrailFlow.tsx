@@ -537,37 +537,22 @@ export function TrailFlow() {
                 )}
               </div>
 
-              <Lottie
-                animationData={loadingWineData}
-                loop
-                style={{ width: 220, height: 220 }}
-              />
-
-              {/* Continue button */}
-              <button
-                type="button"
-                onClick={startTrail}
-                className="rounded-full bg-[var(--accent)] px-8 py-3 text-xl text-white shadow-md active:scale-95 transition-transform font-chilidog"
-              >
-                {isFirstVisit ? "Kezdjük!" : "Folytatom"}
-              </button>
+              <WineGlassHero onTap={startTrail} />
             </div>
 
             {/* Bottom actions */}
-            <div className="relative z-10 w-full max-w-sm space-y-2 mt-4">
-              {scanHistory.slice(0, 1).map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] px-3 py-2.5">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-[rgba(255,255,255,0.75)]">{entry.wineName}</p>
-                    <p className="truncate text-xs text-[rgba(255,255,255,0.35)]">{entry.wineRegion}</p>
-                  </div>
-                  <span className="ml-2 text-base">{entry.vote === "up" ? "👍" : "👎"}</span>
-                </div>
-              ))}
+            <div className="relative z-10 w-full max-w-sm space-y-3 mt-4">
+              <button
+                type="button"
+                onClick={startTrail}
+                className="w-full rounded-full bg-[var(--accent)] py-3 text-xl text-white shadow-md active:scale-95 transition-transform font-chilidog"
+              >
+                {isFirstVisit ? "Kezdjük!" : "Folytatom"}
+              </button>
               <button
                 type="button"
                 onClick={() => setStep("itallap")}
-                className="w-full py-1 text-xs text-[rgba(255,255,255,0.4)] underline underline-offset-2 active:opacity-70"
+                className="w-full py-1 text-xs text-[var(--muted)] underline underline-offset-2 active:opacity-70"
               >
                 📋 Étteremben vagy? Borlap fotózása
               </button>
