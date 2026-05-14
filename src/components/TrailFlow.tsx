@@ -537,15 +537,11 @@ export function TrailFlow() {
                 )}
               </div>
 
-              {isFirstVisit ? (
-                <Lottie
-                  animationData={loadingWineData}
-                  loop
-                  style={{ width: 220, height: 220 }}
-                />
-              ) : (
-                <WineGlassHero onTap={startTrail} />
-              )}
+              <Lottie
+                animationData={loadingWineData}
+                loop
+                style={{ width: 220, height: 220 }}
+              />
 
               {/* Continue button */}
               <button
