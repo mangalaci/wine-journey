@@ -493,8 +493,7 @@ export function TrailFlow() {
               <Lottie
                 animationData={waveData}
                 loop
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                rendererSettings={{ preserveAspectRatio: "xMidYMax slice" } as any}
+                rendererSettings={{ preserveAspectRatio: "xMidYMax slice" }}
                 style={{ width: "100%", height: "100%" }}
               />
               {/* Fade to app background at top edge */}
