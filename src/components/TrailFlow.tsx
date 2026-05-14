@@ -161,7 +161,7 @@ function WineGlassHero({ onTap }: { onTap: () => void }) {
 
           {/* Glass body */}
           <path
-            d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5 Z"
+            d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 34,138 L 34,146 C 34,151 66,151 66,146 L 66,138 L 54,138 L 58,104 C 98,88 98,45 85,5 Z"
             fill="url(#wg-glass-body)"
           />
 
@@ -185,7 +185,7 @@ function WineGlassHero({ onTap }: { onTap: () => void }) {
 
           {/* Glass outline */}
           <path
-            d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5"
+            d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 34,138 L 34,146 C 34,151 66,151 66,146 L 66,138 L 54,138 L 58,104 C 98,88 98,45 85,5"
             fill="none"
             stroke="#8c1c2c"
             strokeWidth="2.2"
@@ -537,11 +537,7 @@ export function TrailFlow() {
                 )}
               </div>
 
-              <Lottie
-                animationData={cheersWineData}
-                loop
-                style={{ width: 280, height: 187 }}
-              />
+              <WineGlassHero onTap={startTrail} />
             </div>
 
             {/* Bottom actions */}
