@@ -476,9 +476,10 @@ export function TrailFlow() {
               <div className="text-center">
                 {isFirstVisit ? (
                   <>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[rgba(255,255,255,0.35)]">Borangolo</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Borangolo</p>
                     <h1
-                      className="mt-3 text-[2.6rem] leading-[1.15] font-bold text-[var(--ink)] font-chilidog"
+                      className="mt-3 text-[2.6rem] leading-[1.15] font-chilidog"
+                      style={{ color: "#c0120c", WebkitTextStroke: "2px #f5c400", paintOrder: "stroke fill" }}
                     >
                       Fedezd fel az ízlésedet!
                     </h1>
@@ -489,7 +490,8 @@ export function TrailFlow() {
                 ) : (
                   <>
                     <h1
-                      className="text-[2.2rem] font-bold text-[var(--ink)] font-chilidog"
+                      className="text-[2.2rem] font-chilidog"
+                      style={{ color: "#c0120c", WebkitTextStroke: "2px #f5c400", paintOrder: "stroke fill" }}
                     >
                       Üdv vissza!
                     </h1>
