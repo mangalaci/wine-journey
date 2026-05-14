@@ -111,70 +111,89 @@ function getSuggestion(likedWines: LikedWine[], dislikedWines: LikedWine[], excl
 
 // ─── Wine glass hero ──────────────────────────────────────────────────────────
 
-function WineGlassHero({ onTap, label, dark }: { onTap: () => void; label: string; dark?: boolean }) {
+function WineGlassHero({ onTap }: { onTap: () => void }) {
+  const [clinking, setClinking] = useState(false);
+
+  const handleTap = () => {
+    if (clinking) return;
+    setClinking(true);
+    setTimeout(() => {
+      setClinking(false);
+      onTap();
+    }, 480);
+  };
+
   return (
     <button
       type="button"
-      onClick={onTap}
-      className="flex flex-col items-center gap-4 active:scale-95 transition-transform duration-150"
-      aria-label={label}
+      onClick={handleTap}
+      className="flex flex-col items-center"
+      aria-label="Tovább"
     >
-      <svg
-        viewBox="0 0 100 155"
-        className="w-52"
-        style={{ filter: dark ? "drop-shadow(0 0 32px rgba(180,40,60,0.55))" : "drop-shadow(0 6px 24px rgba(140,28,46,0.22))" }}
-        aria-hidden
+      <div
+        className={clinking ? "animate-glass-clink" : "animate-float-1"}
+        style={{ filter: "drop-shadow(0 8px 32px rgba(140,28,46,0.30))" }}
       >
-        <defs>
-          <clipPath id="wg-bowl">
-            <path d="M 15,5 C 2,45 2,88 42,104 L 58,104 C 98,88 98,45 85,5 Z" />
-          </clipPath>
-          <linearGradient id="wg-wine" x1="0" y1="0" x2="0.4" y2="1">
-            <stop offset="0%" stopColor="#c4435a" />
-            <stop offset="100%" stopColor="#5a1a28" />
-          </linearGradient>
-        </defs>
+        <svg viewBox="0 0 100 155" className="w-52" aria-hidden>
+          <defs>
+            <clipPath id="wg-bowl">
+              <path d="M 15,5 C 2,45 2,88 42,104 L 58,104 C 98,88 98,45 85,5 Z" />
+            </clipPath>
+            <linearGradient id="wg-wine" x1="0" y1="0" x2="0.35" y2="1">
+              <stop offset="0%" stopColor="#c4435a" />
+              <stop offset="100%" stopColor="#4a1020" />
+            </linearGradient>
+            <linearGradient id="wg-glass-body" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stopColor="rgba(160,190,210,0.18)" />
+              <stop offset="45%"  stopColor="rgba(255,255,255,0.06)" />
+              <stop offset="100%" stopColor="rgba(160,190,210,0.14)" />
+            </linearGradient>
+            <radialGradient id="wg-wine-highlight" cx="25%" cy="35%" r="55%">
+              <stop offset="0%"   stopColor="rgba(220,100,120,0.35)" />
+              <stop offset="100%" stopColor="transparent" />
+            </radialGradient>
+          </defs>
 
-        {/* Glass body */}
-        <path
-          d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5 Z"
-          fill={dark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.10)"}
-        />
-
-        {/* Wine liquid */}
-        <g clipPath="url(#wg-bowl)">
-          <rect x="-5" y="75" width="110" height="33" fill="url(#wg-wine)" opacity="0.85" />
+          {/* Glass body */}
           <path
-            className="animate-wave"
-            d="M -40,72 Q -20,63 0,72 Q 20,81 40,72 Q 60,63 80,72 Q 100,81 120,72 Q 140,63 160,72 L 160,78 L -40,78 Z"
-            fill="url(#wg-wine)"
-            opacity="0.92"
+            d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5 Z"
+            fill="url(#wg-glass-body)"
           />
-        </g>
 
-        {/* Glass outline */}
-        <path
-          d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5"
-          fill="none"
-          stroke={dark ? "rgba(255,255,255,0.65)" : "#8c1c2c"}
-          strokeWidth="2.5"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
+          {/* Wine + bubbles */}
+          <g clipPath="url(#wg-bowl)">
+            <rect x="-5" y="72" width="110" height="36" fill="url(#wg-wine)" opacity="0.92" />
+            <rect x="-5" y="72" width="110" height="36" fill="url(#wg-wine-highlight)" />
+            <path
+              className="animate-wave"
+              d="M -40,70 Q -20,61 0,70 Q 20,79 40,70 Q 60,61 80,70 Q 100,79 120,70 Q 140,61 160,70 L 160,76 L -40,76 Z"
+              fill="url(#wg-wine)"
+              opacity="0.95"
+            />
+            <circle cx="30"  cy="100" r="1.8" fill="rgba(255,255,255,0.55)" className="animate-bubble-1" />
+            <circle cx="50"  cy="96"  r="1.3" fill="rgba(255,255,255,0.45)" className="animate-bubble-2" />
+            <circle cx="42"  cy="102" r="2.0" fill="rgba(255,255,255,0.5)"  className="animate-bubble-3" />
+            <circle cx="62"  cy="98"  r="1.5" fill="rgba(255,255,255,0.4)"  className="animate-bubble-4" />
+            <circle cx="36"  cy="94"  r="1.1" fill="rgba(255,255,255,0.5)"  className="animate-bubble-5" />
+            <circle cx="56"  cy="103" r="1.7" fill="rgba(255,255,255,0.45)" className="animate-bubble-6" />
+          </g>
 
-        {/* Shine highlight */}
-        <path
-          d="M 22,18 C 14,48 14,78 37,97"
-          fill="none"
-          stroke={dark ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.55)"}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        />
-      </svg>
+          {/* Glass outline */}
+          <path
+            d="M 15,5 C 2,45 2,88 42,104 L 46,138 L 22,138 L 22,148 C 22,154 78,154 78,148 L 78,138 L 54,138 L 58,104 C 98,88 98,45 85,5"
+            fill="none"
+            stroke="#8c1c2c"
+            strokeWidth="2.2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
 
-      <span className={`text-sm font-semibold uppercase tracking-widest ${dark ? "text-[rgba(255,255,255,0.75)]" : "text-[var(--ink)]"}`}>
-        {label}
-      </span>
+          {/* Shine highlights */}
+          <path d="M 22,18 C 14,48 14,78 37,97" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 72,24 C 78,46 76,70 65,90" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="49" y1="107" x2="47" y2="136" stroke="rgba(255,255,255,0.22)" strokeWidth="1" strokeLinecap="round" />
+        </svg>
+      </div>
     </button>
   );
 }
@@ -502,24 +521,7 @@ export function TrailFlow() {
                 )}
               </div>
 
-              {/* 3D wine bottle — Spline iframe embed */}
-              <div
-                className="animate-float-1 cursor-pointer active:scale-95 transition-transform duration-150 relative overflow-hidden"
-                style={{ width: "min(80vw, 310px)", height: "min(400px, 50dvh)" }}
-                onClick={startTrail}
-              >
-                <iframe
-                  src="https://my.spline.design/winebottle-PBiCYKhnKM2nyO4JJ6tVWTbu/"
-                  style={{ width: "120%", height: "calc(100% + 60px)", border: "none", marginLeft: "-10%", marginTop: "0" }}
-                  title="3D borosüveg"
-                  loading="lazy"
-                />
-                {/* Szélek + badge elfedése */}
-                <div className="pointer-events-none absolute inset-0" style={{
-                  background: `linear-gradient(to bottom, var(--bg) 0%, transparent 18%, transparent 75%, var(--bg) 100%),
-                               linear-gradient(to right, var(--bg) 0%, transparent 18%, transparent 82%, var(--bg) 100%)`
-                }} />
-              </div>
+              <WineGlassHero onTap={startTrail} />
 
               {/* Continue button */}
               <button

@@ -84,3 +84,24 @@ body {
 }
 
 .animate-wave { animation: wave-flow 3s linear infinite; will-change: transform; }
+
+@keyframes bubble-rise {
+  0%   { transform: translateY(0);     opacity: 0; }
+  15%  { opacity: 0.65; }
+  85%  { opacity: 0.4; }
+  100% { transform: translateY(-26px); opacity: 0; }
+}
+@keyframes glass-clink {
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(14deg); }
+  50%  { transform: rotate(-8deg); }
+  75%  { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+.animate-bubble-1 { animation: bubble-rise 2.3s ease-in 0.0s infinite; }
+.animate-bubble-2 { animation: bubble-rise 3.2s ease-in 0.9s infinite; }
+.animate-bubble-3 { animation: bubble-rise 2.8s ease-in 1.6s infinite; }
+.animate-bubble-4 { animation: bubble-rise 3.6s ease-in 0.4s infinite; }
+.animate-bubble-5 { animation: bubble-rise 2.5s ease-in 2.2s infinite; }
+.animate-bubble-6 { animation: bubble-rise 3.9s ease-in 1.3s infinite; }
+.animate-glass-clink { animation: glass-clink 0.55s cubic-bezier(0.36,0.07,0.19,0.97) forwards; }
