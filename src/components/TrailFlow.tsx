@@ -514,8 +514,11 @@ export function TrailFlow() {
                   title="3D borosüveg"
                   loading="lazy"
                 />
-                {/* Spline badge takarása */}
-                <div className="absolute bottom-0 left-0 right-0 h-10" style={{ background: "linear-gradient(to bottom, transparent, var(--bg))" }} />
+                {/* Szélek + badge elfedése */}
+                <div className="pointer-events-none absolute inset-0" style={{
+                  background: `linear-gradient(to bottom, var(--bg) 0%, transparent 18%, transparent 75%, var(--bg) 100%),
+                               linear-gradient(to right, var(--bg) 0%, transparent 18%, transparent 82%, var(--bg) 100%)`
+                }} />
               </div>
 
               {/* Continue button */}
