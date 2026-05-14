@@ -490,7 +490,7 @@ export function TrailFlow() {
                 ) : (
                   <>
                     <h1
-                      className="text-[2.2rem] font-chilidog"
+                      className="text-[2rem] font-chilidog"
                       style={{ color: "#c0120c", WebkitTextStroke: "2px #f5c400", paintOrder: "stroke fill" }}
                     >
                       Üdv vissza!
@@ -522,7 +522,7 @@ export function TrailFlow() {
               <button
                 type="button"
                 onClick={startTrail}
-                className="rounded-full border border-[var(--accent)] bg-[var(--accent)] px-8 py-3 text-sm font-semibold uppercase tracking-widest text-white shadow-md active:scale-95 transition-transform"
+                className="rounded-full bg-[var(--accent)] px-8 py-3 text-xl text-white shadow-md active:scale-95 transition-transform font-chilidog"
               >
                 {isFirstVisit ? "Kezdjük!" : "Folytatom"}
               </button>
