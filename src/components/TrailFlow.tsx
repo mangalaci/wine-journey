@@ -10,6 +10,7 @@ import { buildTasteProfile, type LikedWine } from "@/lib/tasteProfile";
 import { buildTasteRadar } from "@/lib/tasteRadar";
 import { WINE_REFERENCE } from "@/lib/wineReference";
 import waveData from "@/lottie/wave-bg.json";
+import loadingWineData from "@/lottie/loading-wine.json";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
@@ -138,7 +139,7 @@ function WineGlassHero({ onTap }: { onTap: () => void }) {
         className={clinking ? "animate-glass-clink" : ""}
         style={{ filter: "drop-shadow(0 8px 32px rgba(140,28,46,0.30))" }}
       >
-        <svg viewBox="0 0 100 155" className="w-52" aria-hidden>
+        <svg viewBox="0 0 100 155" className="w-40" aria-hidden>
           <defs>
             <clipPath id="wg-bowl">
               <path d="M 15,5 C 2,45 2,88 42,104 L 58,104 C 98,88 98,45 85,5 Z" />
@@ -536,7 +537,15 @@ export function TrailFlow() {
                 )}
               </div>
 
-              <WineGlassHero onTap={startTrail} />
+              {isFirstVisit ? (
+                <Lottie
+                  animationData={loadingWineData}
+                  loop
+                  style={{ width: 220, height: 220 }}
+                />
+              ) : (
+                <WineGlassHero onTap={startTrail} />
+              )}
 
               {/* Continue button */}
               <button
