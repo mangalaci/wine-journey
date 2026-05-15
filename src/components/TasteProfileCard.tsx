@@ -46,7 +46,6 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
 
   const dataPoints = AXES.map(({ angle, key }) => toXY(cx, cy, r, angle, scores[key]));
   const polygon = dataPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-  const zeroPolygon = AXES.map(() => `${cx},${cy}`).join(" ");
 
   const gridPolygons = [1, 2, 3, 4, 5].map((level) =>
     AXES.map(({ angle }) => {
@@ -63,57 +62,47 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
     return { x: p.x, y: p.y, label, key, angle };
   });
 
+  const clipId = `wine-fill-${cx}`;
+
   return (
     <svg viewBox="0 0 220 220" className="w-full max-w-[220px] mx-auto">
+      <defs>
+        {animate && (
+          <clipPath id={clipId}>
+            <rect x="0" width="220" y="220" height="0">
+              <animate attributeName="y" from="220" to="0" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.2s" />
+              <animate attributeName="height" from="0" to="220" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.2s" />
+            </rect>
+          </clipPath>
+        )}
+      </defs>
+
       {gridPolygons.map((pts, i) => (
-        <polygon
-          key={i}
-          points={pts}
-          fill={i === 4 ? "none" : "none"}
-          stroke="#e8e0d8"
-          strokeWidth="1"
-        />
+        <polygon key={i} points={pts} fill="none" stroke="#e8e0d8" strokeWidth="1" />
       ))}
 
       {axisEnds.map((ep, i) => (
-        <line
-          key={i}
-          x1={cx}
-          y1={cy}
-          x2={ep.x.toFixed(1)}
-          y2={ep.y.toFixed(1)}
-          stroke="#e8e0d8"
-          strokeWidth="1"
-        />
+        <line key={i} x1={cx} y1={cy} x2={ep.x.toFixed(1)} y2={ep.y.toFixed(1)} stroke="#e8e0d8" strokeWidth="1" />
       ))}
 
+      {/* Outline mindig látható */}
+      <polygon points={polygon} fill="none" stroke="#7c2d43" strokeWidth="2" strokeLinejoin="round" strokeOpacity={animate ? "0.2" : "1"} />
+
+      {/* Töltet alulról felfelé */}
       <polygon
-        points={animate ? zeroPolygon : polygon}
+        points={polygon}
         fill="#7c2d43"
         fillOpacity="0.25"
         stroke="#7c2d43"
         strokeWidth="2"
         strokeLinejoin="round"
-      >
-        {animate && (
-          <animate
-            attributeName="points"
-            from={zeroPolygon}
-            to={polygon}
-            dur="1.2s"
-            fill="freeze"
-            calcMode="spline"
-            keySplines="0.4 0 0.2 1"
-            keyTimes="0;1"
-            begin="0.3s"
-          />
-        )}
-      </polygon>
+        clipPath={animate ? `url(#${clipId})` : undefined}
+      />
 
       {dataPoints.map((p, i) => (
         <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r={animate ? "0" : "3.5"} fill="#7c2d43">
           {animate && (
-            <animate attributeName="r" from="0" to="3.5" dur="0.4s" fill="freeze" begin={`${0.3 + 1.2 + i * 0.08}s`} />
+            <animate attributeName="r" from="0" to="3.5" dur="0.4s" fill="freeze" begin={`${1.6 + i * 0.08}s`} />
           )}
         </circle>
       ))}
