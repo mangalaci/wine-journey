@@ -68,34 +68,36 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
     <svg viewBox="-25 -75 330 370" className="w-full max-w-[340px] mx-auto">
       <defs>
         {animate && (
-          <clipPath id={clipId}>
-            <rect x="-25" width="330" y="295" height="0">
-              <animate attributeName="y" from="295" to="0" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
-              <animate attributeName="height" from="0" to="295" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
-            </rect>
-          </clipPath>
+          <>
+            {/* diagram fill clip: alulról felfelé */}
+            <clipPath id={clipId}>
+              <rect x="-25" width="330" y="295" height="0">
+                <animate attributeName="y" from="295" to="0" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
+                <animate attributeName="height" from="0" to="295" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
+              </rect>
+            </clipPath>
+            {/* stream clip: felülről lefelé */}
+            <clipPath id={`${clipId}-stream`}>
+              <rect x="85" y="7" width="65" height="0">
+                <animate attributeName="height" from="0" to="45" dur="1.0s" fill="freeze" begin="0.65s" />
+              </rect>
+            </clipPath>
+          </>
         )}
       </defs>
 
       {/* ── Wine bottle ── */}
       {animate && (
         <g>
-          {/* bottle group: translate to top-center, rotate around bottle base */}
           <g transform="translate(35, 25)">
             <g>
-              {/* bottle silhouette */}
               <path
                 d="M-4,-42 L-4,-28 C-8,-24 -11,-18 -11,-8 L-11,18 C-11,22 -7,24 0,24 C7,24 11,22 11,18 L11,-8 C11,-18 8,-24 4,-28 L4,-42 Z"
-                fill="#7c2d43"
-                fillOpacity="0.9"
+                fill="#7c2d43" fillOpacity="0.9"
               />
-              {/* label */}
               <rect x="-7" y="-4" width="14" height="14" rx="2" fill="rgba(255,255,255,0.25)" />
-              {/* cork */}
               <rect x="-3" y="-50" width="6" height="9" rx="1.5" fill="#c4956a" />
-              {/* shine */}
               <line x1="-3" y1="-38" x2="-3" y2="10" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round" />
-              {/* tilt: pivot around bottle base (0, 24) */}
               <animateTransform attributeName="transform" type="rotate"
                 values="0 0 24; 55 0 24; 55 0 24; 0 0 24"
                 keyTimes="0; 0.25; 0.8; 1"
@@ -103,11 +105,10 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
             </g>
           </g>
 
-          {/* pour stream: bottle mouth (96,7) → diagram top (140,45) */}
-          <path d="M 96,7 Q 118,30 140,45" fill="none" stroke="#7c2d43" strokeWidth="5" strokeLinecap="round" opacity="0.85"
-            pathLength="200" strokeDasharray="200" strokeDashoffset="200">
-            <animate attributeName="strokeDashoffset" from="200" to="0" dur="1.4s" fill="freeze" begin="0.65s" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" />
-            <animate attributeName="strokeDashoffset" from="0" to="-200" dur="0.3s" fill="freeze" begin="2.05s" />
+          {/* stream: clipPath-tal felülről lefelé jelenik meg, majd opacity-val tűnik el */}
+          <path d="M 96,7 Q 118,30 140,45" fill="none" stroke="#7c2d43" strokeWidth="5" strokeLinecap="round"
+            clipPath={`url(#${clipId}-stream)`}>
+            <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.8;1" dur="1.5s" fill="freeze" begin="0.65s" />
           </path>
         </g>
       )}
