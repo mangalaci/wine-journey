@@ -57,7 +57,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
   const axisEnds = AXES.map(({ angle }) => toXY(cx, cy, r, angle, 5));
 
   const labelPositions = AXES.map(({ angle, key, label }) => {
-    const pad = 26;
+    const pad = 30;
     const p = toXY(cx, cy, r + pad, angle, 5);
     return { x: p.x, y: p.y, label, key, angle };
   });
@@ -104,10 +104,10 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
           </g>
 
           {/* pour stream: bottle mouth (96,7) → diagram top (140,45) */}
-          <path d="M 96,7 Q 118,30 140,45" fill="none" stroke="#7c2d43" strokeWidth="4" strokeLinecap="round" opacity="0.75"
-            strokeDasharray="100" strokeDashoffset="100">
-            <animate attributeName="strokeDashoffset" from="100" to="0" dur="1.4s" fill="freeze" begin="0.65s" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" />
-            <animate attributeName="strokeDashoffset" from="0" to="-100" dur="0.3s" fill="freeze" begin="2.05s" />
+          <path d="M 96,7 Q 118,30 140,45" fill="none" stroke="#7c2d43" strokeWidth="5" strokeLinecap="round" opacity="0.85"
+            pathLength="200" strokeDasharray="200" strokeDashoffset="200">
+            <animate attributeName="strokeDashoffset" from="200" to="0" dur="1.4s" fill="freeze" begin="0.65s" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" />
+            <animate attributeName="strokeDashoffset" from="0" to="-200" dur="0.3s" fill="freeze" begin="2.05s" />
           </path>
         </g>
       )}
@@ -152,7 +152,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
             <tspan
               x={x.toFixed(1)}
               dy="0"
-              fontSize="8"
+              fontSize="11"
               fill="#9c8e85"
               fontFamily="sans-serif"
             >
@@ -160,8 +160,8 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
             </tspan>
             <tspan
               x={x.toFixed(1)}
-              dy="11"
-              fontSize="9"
+              dy="14"
+              fontSize="12"
               fontWeight="600"
               fill="#2c1810"
               fontFamily="sans-serif"
