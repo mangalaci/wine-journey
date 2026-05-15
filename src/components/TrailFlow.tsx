@@ -12,6 +12,7 @@ import { WINE_REFERENCE } from "@/lib/wineReference";
 import waveData from "@/lottie/wave-bg.json";
 import cheersWineData from "@/lottie/cheers-wine.json";
 import loadingWineData from "@/lottie/loading-wine.json";
+import cheersPalateData from "@/lottie/cheers-wine-palate.json";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
@@ -745,6 +746,9 @@ export function TrailFlow() {
               </>
             ) : (
               <>
+                {winesTriedTotal === 3 && (
+                  <Lottie animationData={cheersPalateData} loop={false} style={{ width: 200, height: 200, margin: "0 auto" }} />
+                )}
                 <div className="text-center">
                   <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
                     {winesTriedTotal === 3 ? "Elkészült az első képed!" : "Így változott az ízlésed"}
