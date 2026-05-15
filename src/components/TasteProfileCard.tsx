@@ -65,11 +65,11 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
   const clipId = `wine-fill-${cx}`;
 
   return (
-    <svg viewBox="-15 -75 310 370" className="w-full mx-auto">
+    <svg viewBox="-25 -75 330 370" className="w-full max-w-[340px] mx-auto">
       <defs>
         {animate && (
           <clipPath id={clipId}>
-            <rect x="-15" width="310" y="295" height="0">
+            <rect x="-25" width="330" y="295" height="0">
               <animate attributeName="y" from="295" to="0" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
               <animate attributeName="height" from="0" to="295" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
             </rect>
@@ -81,7 +81,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
       {animate && (
         <g>
           {/* bottle group: translate to top-center, rotate around bottle base */}
-          <g transform="translate(50, 5)">
+          <g transform="translate(35, 25)">
             <g>
               {/* bottle silhouette */}
               <path
@@ -103,11 +103,11 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
             </g>
           </g>
 
-          {/* pour stream: curved path from tilted bottle mouth to diagram top */}
-          <path d="M 82,-5 Q 110,35 140,70" fill="none" stroke="#7c2d43" strokeWidth="3" strokeLinecap="round"
-            strokeDasharray="80" strokeDashoffset="80">
-            <animate attributeName="strokeDashoffset" from="80" to="0" dur="1.4s" fill="freeze" begin="0.65s" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" />
-            <animate attributeName="strokeDashoffset" from="0" to="-80" dur="0.4s" fill="freeze" begin="2.05s" />
+          {/* pour stream: bottle mouth (96,7) → diagram top (140,45) */}
+          <path d="M 96,7 Q 118,30 140,45" fill="none" stroke="#7c2d43" strokeWidth="4" strokeLinecap="round" opacity="0.75"
+            strokeDasharray="100" strokeDashoffset="100">
+            <animate attributeName="strokeDashoffset" from="100" to="0" dur="1.4s" fill="freeze" begin="0.65s" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" />
+            <animate attributeName="strokeDashoffset" from="0" to="-100" dur="0.3s" fill="freeze" begin="2.05s" />
           </path>
         </g>
       )}
