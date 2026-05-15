@@ -11,6 +11,7 @@ type Props = {
   profile: string;
   radar?: RadarScores;
   compact?: boolean;
+  animate?: boolean;
 };
 
 const DESCRIPTORS: Record<keyof RadarScores, string[]> = {
@@ -40,11 +41,12 @@ function toXY(cx: number, cy: number, r: number, angleDeg: number, value: number
   };
 }
 
-function RadarChart({ scores }: { scores: RadarScores }) {
+function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?: boolean }) {
   const cx = 110, cy = 110, r = 72;
 
   const dataPoints = AXES.map(({ angle, key }) => toXY(cx, cy, r, angle, scores[key]));
   const polygon = dataPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  const zeroPolygon = AXES.map(() => `${cx},${cy}`).join(" ");
 
   const gridPolygons = [1, 2, 3, 4, 5].map((level) =>
     AXES.map(({ angle }) => {
@@ -86,16 +88,34 @@ function RadarChart({ scores }: { scores: RadarScores }) {
       ))}
 
       <polygon
-        points={polygon}
+        points={animate ? zeroPolygon : polygon}
         fill="#7c2d43"
         fillOpacity="0.25"
         stroke="#7c2d43"
         strokeWidth="2"
         strokeLinejoin="round"
-      />
+      >
+        {animate && (
+          <animate
+            attributeName="points"
+            from={zeroPolygon}
+            to={polygon}
+            dur="1.2s"
+            fill="freeze"
+            calcMode="spline"
+            keySplines="0.4 0 0.2 1"
+            keyTimes="0;1"
+            begin="0.3s"
+          />
+        )}
+      </polygon>
 
       {dataPoints.map((p, i) => (
-        <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r="3.5" fill="#7c2d43" />
+        <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r={animate ? "0" : "3.5"} fill="#7c2d43">
+          {animate && (
+            <animate attributeName="r" from="0" to="3.5" dur="0.4s" fill="freeze" begin={`${0.3 + 1.2 + i * 0.08}s`} />
+          )}
+        </circle>
       ))}
 
       {labelPositions.map(({ x, y, label, key, angle }) => {
@@ -131,7 +151,7 @@ function RadarChart({ scores }: { scores: RadarScores }) {
   );
 }
 
-export function TasteProfileCard({ profile, radar, compact }: Props) {
+export function TasteProfileCard({ profile, radar, compact, animate }: Props) {
   const hasData = radar && Object.values(radar).some((v) => v !== 3 && v !== 0);
 
   if (compact) {
@@ -154,7 +174,7 @@ export function TasteProfileCard({ profile, radar, compact }: Props) {
 
       {hasData && radar ? (
         <div className="mt-4">
-          <RadarChart scores={radar} />
+          <RadarChart scores={radar} animate={!!animate} />
           <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1">
             {AXES.map(({ key, label }) => (
               <div key={key} className="flex items-center justify-between">

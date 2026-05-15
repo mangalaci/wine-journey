@@ -746,14 +746,13 @@ export function TrailFlow() {
               </>
             ) : (
               <>
-                <Lottie animationData={cheersPalateData} loop={false} style={{ width: 200, height: 200, margin: "0 auto" }} />
                 <div className="text-center">
                   <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
                     {winesTriedTotal === 3 ? "Elkészült az első képed!" : "Így változott az ízlésed"}
                   </p>
                   <h2 className="mt-2 text-xl font-bold text-[var(--ink)] font-chilidog">A te bor-DNS-ed</h2>
                 </div>
-                <TasteProfileCard profile={tasteProfile} radar={tasteRadar} />
+                <TasteProfileCard profile={tasteProfile} radar={tasteRadar} animate />
               </>
             )}
 
