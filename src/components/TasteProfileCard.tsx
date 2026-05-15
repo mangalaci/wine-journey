@@ -42,7 +42,7 @@ function toXY(cx: number, cy: number, r: number, angleDeg: number, value: number
 }
 
 function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?: boolean }) {
-  const cx = 110, cy = 110, r = 72;
+  const cx = 140, cy = 150, r = 105;
 
   const dataPoints = AXES.map(({ angle, key }) => toXY(cx, cy, r, angle, scores[key]));
   const polygon = dataPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
@@ -57,7 +57,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
   const axisEnds = AXES.map(({ angle }) => toXY(cx, cy, r, angle, 5));
 
   const labelPositions = AXES.map(({ angle, key, label }) => {
-    const pad = 22;
+    const pad = 26;
     const p = toXY(cx, cy, r + pad, angle, 5);
     return { x: p.x, y: p.y, label, key, angle };
   });
@@ -65,14 +65,13 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
   const clipId = `wine-fill-${cx}`;
 
   return (
-    <svg viewBox="-20 -55 260 280" className="w-full max-w-[260px] mx-auto">
+    <svg viewBox="-15 -75 310 370" className="w-full mx-auto">
       <defs>
         {animate && (
           <clipPath id={clipId}>
-            <rect x="0" width="220" y="220" height="0">
-              {/* fill starts after bottle tilts (0.7s) */}
-              <animate attributeName="y" from="220" to="0" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
-              <animate attributeName="height" from="0" to="220" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
+            <rect x="-15" width="310" y="295" height="0">
+              <animate attributeName="y" from="295" to="0" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
+              <animate attributeName="height" from="0" to="295" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
             </rect>
           </clipPath>
         )}
@@ -82,7 +81,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
       {animate && (
         <g>
           {/* bottle group: translate to top-center, rotate around bottle base */}
-          <g transform="translate(38, 10)">
+          <g transform="translate(50, 5)">
             <g>
               {/* bottle silhouette */}
               <path
@@ -105,7 +104,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
           </g>
 
           {/* pour stream: curved path from tilted bottle mouth to diagram top */}
-          <path d="M 70,-5 Q 90,30 110,60" fill="none" stroke="#7c2d43" strokeWidth="3" strokeLinecap="round"
+          <path d="M 82,-5 Q 110,35 140,70" fill="none" stroke="#7c2d43" strokeWidth="3" strokeLinecap="round"
             strokeDasharray="80" strokeDashoffset="80">
             <animate attributeName="strokeDashoffset" from="80" to="0" dur="1.4s" fill="freeze" begin="0.65s" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" />
             <animate attributeName="strokeDashoffset" from="0" to="-80" dur="0.4s" fill="freeze" begin="2.05s" />
