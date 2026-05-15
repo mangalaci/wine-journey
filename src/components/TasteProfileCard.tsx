@@ -65,17 +65,51 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
   const clipId = `wine-fill-${cx}`;
 
   return (
-    <svg viewBox="0 0 220 220" className="w-full max-w-[220px] mx-auto">
+    <svg viewBox="0 -55 220 275" className="w-full max-w-[220px] mx-auto">
       <defs>
         {animate && (
           <clipPath id={clipId}>
             <rect x="0" width="220" y="220" height="0">
-              <animate attributeName="y" from="220" to="0" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.2s" />
-              <animate attributeName="height" from="0" to="220" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.2s" />
+              {/* fill starts after bottle tilts (0.7s) */}
+              <animate attributeName="y" from="220" to="0" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
+              <animate attributeName="height" from="0" to="220" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
             </rect>
           </clipPath>
         )}
       </defs>
+
+      {/* ── Wine bottle ── */}
+      {animate && (
+        <g>
+          {/* bottle group: translate to top-center, rotate around bottle base */}
+          <g transform="translate(110, 10)">
+            <g>
+              {/* bottle silhouette */}
+              <path
+                d="M-4,-42 L-4,-28 C-8,-24 -11,-18 -11,-8 L-11,18 C-11,22 -7,24 0,24 C7,24 11,22 11,18 L11,-8 C11,-18 8,-24 4,-28 L4,-42 Z"
+                fill="#7c2d43"
+                fillOpacity="0.9"
+              />
+              {/* label */}
+              <rect x="-7" y="-4" width="14" height="14" rx="2" fill="rgba(255,255,255,0.25)" />
+              {/* cork */}
+              <rect x="-3" y="-50" width="6" height="9" rx="1.5" fill="#c4956a" />
+              {/* shine */}
+              <line x1="-3" y1="-38" x2="-3" y2="10" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round" />
+              {/* tilt: pivot around bottle base (0, 24) */}
+              <animateTransform attributeName="transform" type="rotate"
+                values="0 0 24; 55 0 24; 55 0 24; 0 0 24"
+                keyTimes="0; 0.25; 0.8; 1"
+                dur="3s" fill="freeze" />
+            </g>
+          </g>
+
+          {/* pour stream */}
+          <line x1="125" y1="28" x2="116" y2="80" stroke="#7c2d43" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0">
+            <animate attributeName="strokeOpacity" values="0;0.6;0.6;0" keyTimes="0;0.05;0.85;1" dur="2.2s" begin="0.65s" fill="freeze" />
+          </line>
+        </g>
+      )}
 
       {gridPolygons.map((pts, i) => (
         <polygon key={i} points={pts} fill="none" stroke="#e8e0d8" strokeWidth="1" />
@@ -85,10 +119,10 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
         <line key={i} x1={cx} y1={cy} x2={ep.x.toFixed(1)} y2={ep.y.toFixed(1)} stroke="#e8e0d8" strokeWidth="1" />
       ))}
 
-      {/* Outline mindig látható */}
+      {/* outline */}
       <polygon points={polygon} fill="none" stroke="#7c2d43" strokeWidth="2" strokeLinejoin="round" strokeOpacity={animate ? "0.2" : "1"} />
 
-      {/* Töltet alulról felfelé */}
+      {/* fill alulról felfelé */}
       <polygon
         points={polygon}
         fill="#7c2d43"
@@ -102,7 +136,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
       {dataPoints.map((p, i) => (
         <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r={animate ? "0" : "3.5"} fill="#7c2d43">
           {animate && (
-            <animate attributeName="r" from="0" to="3.5" dur="0.4s" fill="freeze" begin={`${1.6 + i * 0.08}s`} />
+            <animate attributeName="r" from="0" to="3.5" dur="0.4s" fill="freeze" begin={`${2.2 + i * 0.08}s`} />
           )}
         </circle>
       ))}
