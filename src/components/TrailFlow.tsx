@@ -486,9 +486,8 @@ export function TrailFlow() {
           <button
             type="button"
             onClick={openProfile}
-            className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted)]"
+            className="flex items-center rounded-full bg-[var(--accent)] px-3 py-1.5 text-xs font-medium text-white shadow-sm"
           >
-            <span>🧬</span>
             <span>Profil</span>
           </button>
           {session ? (
@@ -747,10 +746,9 @@ export function TrailFlow() {
             ) : (
               <>
                 <div className="text-center">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
+                  <h2 className="text-xl font-bold text-[var(--ink)] font-chilidog">
                     {winesTriedTotal === 3 ? "Elkészült az első képed!" : "Így változott az ízlésed"}
-                  </p>
-                  <h2 className="mt-2 text-xl font-bold text-[var(--ink)] font-chilidog">A te bor-DNS-ed</h2>
+                  </h2>
                 </div>
                 <TasteProfileCard profile={tasteProfile} radar={tasteRadar} animate />
               </>

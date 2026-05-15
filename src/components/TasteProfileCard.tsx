@@ -76,10 +76,10 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
                 <animate attributeName="height" from="0" to="295" dur="1.4s" fill="freeze" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" begin="0.7s" />
               </rect>
             </clipPath>
-            {/* stream clip: felülről lefelé */}
+            {/* stream clip: függőlegesen lefelé */}
             <clipPath id={`${clipId}-stream`}>
-              <rect x="85" y="7" width="65" height="0">
-                <animate attributeName="height" from="0" to="45" dur="1.0s" fill="freeze" begin="0.65s" />
+              <rect x="91" y="7" width="10" height="0">
+                <animate attributeName="height" from="0" to="150" dur="1.0s" fill="freeze" begin="0.65s" />
               </rect>
             </clipPath>
           </>
@@ -106,10 +106,10 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
           </g>
 
           {/* stream: clipPath-tal felülről lefelé jelenik meg, majd opacity-val tűnik el */}
-          <path d="M 96,7 Q 118,30 140,45" fill="none" stroke="#7c2d43" strokeWidth="5" strokeLinecap="round"
+          <line x1="96" y1="7" x2="96" y2="155" stroke="#7c2d43" strokeWidth="5" strokeLinecap="round"
             clipPath={`url(#${clipId}-stream)`}>
             <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.8;1" dur="1.5s" fill="freeze" begin="0.65s" />
-          </path>
+          </line>
         </g>
       )}
 
