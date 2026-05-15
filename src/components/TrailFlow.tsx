@@ -709,8 +709,9 @@ export function TrailFlow() {
 
         {/* MILESTONE */}
         {step === "milestone" && currentMilestone && (
-          <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6 text-center">
-            <div className="animate-blob-pulse text-8xl">{currentMilestone.emoji}</div>
+          <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-4 text-center">
+            <Lottie animationData={cheersWineData} loop={false} style={{ width: 260, height: 173 }} />
+            <div className="animate-blob-pulse text-6xl">{currentMilestone.emoji}</div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
                 {winesTriedTotal}. állomás
