@@ -65,7 +65,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
   const clipId = `wine-fill-${cx}`;
 
   return (
-    <svg viewBox="0 -55 220 275" className="w-full max-w-[220px] mx-auto">
+    <svg viewBox="-20 -55 260 280" className="w-full max-w-[260px] mx-auto">
       <defs>
         {animate && (
           <clipPath id={clipId}>
@@ -82,7 +82,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
       {animate && (
         <g>
           {/* bottle group: translate to top-center, rotate around bottle base */}
-          <g transform="translate(55, 10)">
+          <g transform="translate(38, 10)">
             <g>
               {/* bottle silhouette */}
               <path
@@ -104,10 +104,12 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
             </g>
           </g>
 
-          {/* pour stream */}
-          <line x1="74" y1="28" x2="110" y2="80" stroke="#7c2d43" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0">
-            <animate attributeName="strokeOpacity" values="0;0.6;0.6;0" keyTimes="0;0.05;0.85;1" dur="2.2s" begin="0.65s" fill="freeze" />
-          </line>
+          {/* pour stream: curved path from tilted bottle mouth to diagram top */}
+          <path d="M 70,-5 Q 90,30 110,60" fill="none" stroke="#7c2d43" strokeWidth="3" strokeLinecap="round"
+            strokeDasharray="80" strokeDashoffset="80">
+            <animate attributeName="strokeDashoffset" from="80" to="0" dur="1.4s" fill="freeze" begin="0.65s" calcMode="spline" keySplines="0.4 0 0.2 1" keyTimes="0;1" />
+            <animate attributeName="strokeDashoffset" from="0" to="-80" dur="0.4s" fill="freeze" begin="2.05s" />
+          </path>
         </g>
       )}
 
