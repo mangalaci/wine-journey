@@ -82,7 +82,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
       {animate && (
         <g>
           {/* bottle group: translate to top-center, rotate around bottle base */}
-          <g transform="translate(94, 10)">
+          <g transform="translate(55, 10)">
             <g>
               {/* bottle silhouette */}
               <path
@@ -105,7 +105,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
           </g>
 
           {/* pour stream */}
-          <line x1="109" y1="28" x2="110" y2="80" stroke="#7c2d43" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0">
+          <line x1="74" y1="28" x2="110" y2="80" stroke="#7c2d43" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0">
             <animate attributeName="strokeOpacity" values="0;0.6;0.6;0" keyTimes="0;0.05;0.85;1" dur="2.2s" begin="0.65s" fill="freeze" />
           </line>
         </g>
