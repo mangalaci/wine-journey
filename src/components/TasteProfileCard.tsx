@@ -65,7 +65,7 @@ function RadarChart({ scores, animate = false }: { scores: RadarScores; animate?
   const clipId = `wine-fill-${cx}`;
 
   return (
-    <svg viewBox="-25 -75 330 370" className="w-full max-w-[340px] mx-auto">
+    <svg viewBox="-40 -75 380 395" className="w-full max-w-[340px] mx-auto">
       <defs>
         {animate && (
           <>
