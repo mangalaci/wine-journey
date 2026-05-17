@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY! });
 
-const PROMPT = `You are a wine expert analyzing a restaurant wine list photo.
-Extract ALL wines visible in this image.
+const PROMPT = `You are a wine expert analyzing a restaurant wine list (one or more pages).
+Extract ALL wines visible across all provided images — do not list duplicates.
 
 For each wine return an object with:
 - name: wine name as it appears on the list
@@ -19,17 +19,18 @@ If the image is not a wine list, return: {"error":"Not a wine list"}`;
 
 export async function POST(req: Request) {
   try {
-    const { image } = await req.json() as { image: string };
-    const base64 = image.includes(",") ? image.split(",")[1] : image;
+    const body = await req.json() as { image?: string; images?: string[] };
+    const rawImages = body.images ?? (body.image ? [body.image] : []);
+    const imageParts = rawImages.map((img) => {
+      const base64 = img.includes(",") ? img.split(",")[1] : img;
+      return { inlineData: { data: base64, mimeType: "image/jpeg" as const } };
+    });
 
     const result = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
         {
-          parts: [
-            { inlineData: { data: base64, mimeType: "image/jpeg" } },
-            { text: PROMPT },
-          ],
+          parts: [...imageParts, { text: PROMPT }],
         },
       ],
     });

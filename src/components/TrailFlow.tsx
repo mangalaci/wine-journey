@@ -29,6 +29,7 @@ type TrailStep =
   | "suggestion"
   | "show_suggestion"
   | "itallap"
+  | "itallap_preview"
   | "itallap_identifying"
   | "itallap_result";
 
@@ -232,6 +233,7 @@ export function TrailFlow() {
   const [winesTriedTotal, setWinesTriedTotal] = useState(0);
   const [scanHistory, setScanHistory] = useState<ScanEntry[]>([]);
   const [itallapWines, setItallapWines] = useState<ItallapWine[]>([]);
+  const [itallapPages, setItallapPages] = useState<string[]>([]);
 
   // Camera
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -262,7 +264,7 @@ export function TrailFlow() {
   }, [showProfile, step, stopCamera]);
 
   const openProfile = () => { history.pushState(null, ""); setShowProfile(true); };
-  const goToItallap = () => { history.pushState(null, ""); setStep("itallap"); };
+  const goToItallap = () => { history.pushState(null, ""); setItallapPages([]); setStep("itallap"); };
 
   // ── Camera ──
   useEffect(() => {
@@ -416,7 +418,7 @@ export function TrailFlow() {
     }
   };
 
-  const handleItallapCapture = async () => {
+  const handleItallapCapture = () => {
     const video = videoRef.current;
     if (!video || video.videoWidth === 0) return;
     const canvas = document.createElement("canvas");
@@ -425,13 +427,18 @@ export function TrailFlow() {
     canvas.getContext("2d")?.drawImage(video, 0, 0);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
     setCaptureUrl(dataUrl);
+    setItallapPages((prev) => [...prev, dataUrl]);
+    setStep("itallap_preview");
+  };
+
+  const handleItallapSubmit = async (pages: string[]) => {
     setItallapWines([]);
     setStep("itallap_identifying");
     try {
       const res = await fetch("/api/itallap", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: dataUrl }),
+        body: JSON.stringify({ images: pages }),
       });
       const data = await res.json() as unknown;
       if (!Array.isArray(data)) {
@@ -859,6 +866,45 @@ export function TrailFlow() {
           </div>
         )}
 
+        {/* ITALLAP PREVIEW — page added, add more or submit */}
+        {step === "itallap_preview" && captureUrl && (
+          <div className="animate-screen-in flex flex-1 flex-col gap-4">
+            <div className="text-center">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">Borlap</p>
+              <h2 className="mt-1 text-lg font-bold text-[var(--ink)] font-chilidog">
+                {itallapPages.length}. oldal hozzáadva
+              </h2>
+              <p className="mt-1 text-xs text-[var(--muted)]">Van még oldal?</p>
+            </div>
+            <div
+              className="relative mx-auto overflow-hidden rounded-3xl border border-[var(--border)] shadow-xl"
+              style={{ width: "min(100%, calc(65vh * 3 / 4))", aspectRatio: "3/4" }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={captureUrl} alt="Borlap oldal" className="h-full w-full object-cover" />
+              <div className="absolute top-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-xs font-bold text-white">
+                {itallapPages.length} oldal
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setStep("itallap")}
+                className="flex-1 rounded-2xl border border-[var(--border)] bg-white py-3.5 text-sm font-medium text-[var(--ink)] active:scale-95 transition-transform"
+              >
+                Még egy oldal
+              </button>
+              <button
+                type="button"
+                onClick={() => handleItallapSubmit(itallapPages)}
+                className="flex-1 rounded-2xl bg-[var(--accent)] py-3.5 text-sm font-bold text-white active:scale-95 transition-transform"
+              >
+                Feldolgozás
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ITALLAP IDENTIFYING */}
         {step === "itallap_identifying" && (
           <div className="animate-screen-in flex flex-1 flex-col items-center justify-center gap-6">
@@ -873,7 +919,9 @@ export function TrailFlow() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
-              <p className="text-sm text-[var(--muted)]">Borlap feldolgozása…</p>
+              <p className="text-sm text-[var(--muted)]">
+                {itallapPages.length > 1 ? `${itallapPages.length} oldal feldolgozása…` : "Borlap feldolgozása…"}
+              </p>
             </div>
           </div>
         )}
